@@ -1,1 +1,1 @@
-# chess
+# Multiplayer Chess game
