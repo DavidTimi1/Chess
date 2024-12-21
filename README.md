@@ -1,2 +1,2 @@
 # Multiplayer Chess game
-inspired by chess titan
+inspired by chess titans
