@@ -102,7 +102,7 @@ function King(name){
 let whitePawn = Array(8);
 for (let i = 0; i < 8; i++){
     // +1 because of the 0-index needed for arrays
-    whitePawn[i+1] = new WPawn(`white-pawn${i + 1}.png`);
+    whitePawn[i+1] = new WPawn("white-pawn.png");
     whitePawn[i+1].id = `whitePawn[${i+1}]`
     whitePawn[i+1].row = 1;
     whitePawn[i+1].col = i;
@@ -112,7 +112,7 @@ for (let i = 0; i < 8; i++){
 let blackPawn = Array(8);
 for (let i = 0; i < 8; i++){
     // +1 because of the 0-index needed for arrays
-    blackPawn[i+1] = new BPawn(`black-pawn${i + 1}.png`);
+    blackPawn[i+1] = new BPawn("black-pawn.png");
     blackPawn[i+1].id = `blackPawn[${i+1}]`;
     blackPawn[i+1].row = 6;
     blackPawn[i+1].col = i;
@@ -139,41 +139,41 @@ blackKnight2.row = 7;
 blackKnight2.col = 1;
 
 // WHITE BISHOPS
-let whiteBishop1 = new Bishop("white-bishop1.png");
+let whiteBishop1 = new Bishop("white-bishop.png");
 whiteBishop1.id = "whiteBishop1";
 whiteBishop1.row = 0;
 whiteBishop1.col = 2;
-let whiteBishop2 = new Bishop("white-bishop2.png");
+let whiteBishop2 = new Bishop("white-bishop.png");
 whiteBishop2.id = "whiteBishop2";
 whiteBishop2.row = 0;
 whiteBishop2.col = 5;
 
 // BLACK BISHOPS
-let blackBishop1 = new Bishop("black-bishop1.png");
+let blackBishop1 = new Bishop("black-bishop.png");
 blackBishop1.id = "blackBishop1";
 blackBishop1.row = 7;
 blackBishop1.col = 5;
-let blackBishop2 = new Bishop("black-bishop2.png");
+let blackBishop2 = new Bishop("black-bishop.png");
 blackBishop2.id = "blackBishop2";
 blackBishop2.row = 7;
 blackBishop2.col = 2;
 
 // WHITE ROOKS
-let whiteRook1 = new Rook("white-rook1.png");
+let whiteRook1 = new Rook("white-rook.png");
 whiteRook1.id = "whiteRook1";
 whiteRook1.row = 0;
 whiteRook1.col = 0;
-let whiteRook2 = new Rook("white-rook2.png");
+let whiteRook2 = new Rook("white-rook.png");
 whiteRook2.id = "whiteRook2";
 whiteRook2.row = 0;
 whiteRook2.col = 7;
 
 // BLACK ROOKS
-let blackRook1 = new Rook("black-rook1.png");
+let blackRook1 = new Rook("black-rook.png");
 blackRook1.id = "blackRook1";
 blackRook1.row = 7;
 blackRook1.col = 7;
-let blackRook2 = new Rook("black-rook2.png");
+let blackRook2 = new Rook("black-rook.png");
 blackRook2.id = "blackRook2";
 blackRook2.row = 7;
 blackRook2.col = 0;
@@ -357,7 +357,7 @@ let question = function(k,l){
         return "captureable";
     } else if ( chessboard[k][l].classList.contains("activated") ) {
 
-        console.log("It is an active cell");
+        // console.log("It is an active cell");
 
     } else if ( chessboard[k][l].classList.contains(inactiveSide) ) {
 
@@ -1009,6 +1009,12 @@ function play(arr){
         }
         turn++;
 
+        // show undo button if it was not on
+        if (history.length){
+            document.querySelector(".history-rev").classList.remove("hide");
+        } else {
+            document.querySelector(".history-rev").classList.add("hide");
+        }
        
     // clear the remove the former selection
     
@@ -1882,7 +1888,7 @@ let upgrade = function(newPiece){
     activePiece.piece = newPiece;
 
     // swap the new piece for the pawn 
-    activePiece.dir = `${activeSide}-pawn-${newPiece}.png`;
+    activePiece.dir = `${activeSide}-${newPiece}.png`;
 
     // remove promotion overlay
     promoteModal.style.display = "none"; 
@@ -2178,7 +2184,7 @@ let notify = function(phrase,colour){
     
     document.getElementById("notify").style.animationName = "";
     setTimeout(function() {
-        document.getElementById("note").innerText = phrase.toUpperCase();
+        document.getElementById("note").innerText = phrase;
         document.getElementById("note-theme").style.backgroundColor = colour;
         document.getElementById("notify").style.animationName = "slideInOut";
     }, 100);

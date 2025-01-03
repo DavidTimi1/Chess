@@ -1,23 +1,41 @@
+* {
+    position: relative;
+    box-sizing: border-box;
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+:root {
+    margin: 0;
+    padding: 0;
+}
+
 body{
     background-color: grey;
     padding: 0;
     margin: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-size: 17px;
 }
+
 .container{
+    top: 0;
+    left: 0;
     height : 100vh;
     width : 100%;
     position: absolute;
     background-image: url("chesspaper1.jpg");
+    background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
 }
 #preGame-overlay{
+    display: flex;
     align-items: center;
     text-align: center;
     justify-items: center;
     flex-direction: column;
-    margin-right: auto;
-    margin-left: auto;
 }
 .light-sqr{
     background-color: #FFFDD0;
@@ -27,21 +45,34 @@ body{
     background-color: #573a2e;
     border : 1px solid #573a2e;
 }
+
+.board-container {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px;
+    max-height: 100vh;
+    overflow: hidden auto;
+}
+
 table{
-    width: 650px;
-    height: 600px;
     text-align: center;
-    margin-right: auto;
-    margin-left: auto;
+    margin: auto;
     box-shadow: 0px 0px 10px 10px #130a07;
     border-collapse: collapse;
 }
 
 td{
     padding: 0px;
-    font-size: 35px;
-    height: 78px;
-    width: 75px;
+    font-size: 0;
+    aspect-ratio: 1/1;
+    table-layout: fixed;
+    transition: .2s ease-in-out;
+
+    > img {
+        width: 100%;
+        object-fit: contain;
+    }
 }
 
 #end-overlay,
@@ -84,7 +115,6 @@ td{
 span,
 h2,
 h1{
-    font-family:Georgia, 'Times New Roman', Times, serif;
     color: #573a2e;
     text-shadow: 3px 3px 4px #FFFDD0;
     text-transform: uppercase;
@@ -114,63 +144,68 @@ h2{
 
 button{
     background-color: green;
+    padding: 5px 10px;
     color : white;
     font-size: 25px;
     font-weight: bold;
-    border-radius: 10px;
-    border: 0px inset transparent;
-    box-shadow: 0px 0px 0px 0px white;
+    border: none;
+    box-shadow: 0px 0px 10px 5px #130a07;
+    border-radius: 99px;
+    transform: scale(1);
+    transition: .25 ease-in-out;
+    cursor: pointer;
 }
-button:hover {
-    animation : resize 100ms ease-in-out forwards;
+button:hover{
+    background-color: #00dd00;
+    transform: scale(1.2);
 }
-@keyframes resize{
-    0% { font-size : 25px;
-        box-shadow: 0px 0px 3px 3px white;}
-    30% {box-shadow : 0px 0px 5px 5px white;}
-    60% {box-shadow : 0px 0px 7px 7px white;}
-    100% { font-size : 40px;
-        box-shadow : 0px 0px 10px 10px white;}
+
+#noSabi {
+    color: inherit;
+    text-decoration: none;
+    text-shadow: 0px 0px 10px 5px #130a07;
+    transform: scale(1);
+    transition: .25 ease-in-out;
+
+    &:hover {
+        transform: scale(1.2);
+    }
 }
+
 #effects,
 #intro-head{
     color : white;
     margin-bottom: 30px;
 }
 .creatorbut{
-    background-color: transparent;
     font-size: 30px;
-    text-shadow: 0px 0px 10px white;
 }
-.creatorbut:hover{
-    animation : resizeGlow 100ms ease-in-out forwards;
-}
-@keyframes resizeGlow{
-    0% { font-size : 25px;
-        text-shadow: 0px 0px 5px white;}
-    30% {text-shadow : 0px 0px 10px white;}
-    60% {text-shadow : 0px 0px 15px white;}
-    100% { font-size : 50px;
-        text-shadow : 0px 0px 20px white;}
-}
+
 #intro,
 #creator,
-#startGame,
-#noSabi{
+#startGame{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
     top: 20vh;
     position: relative;
     color : white;
 }
-.hide{
-    display : none;
+
+.hide {
+    display : none !important;
 }
 
-#noSabi{
-    text-decoration: none;
-    margin-top: 20px;
-}
 h3{
     font-weight: bold;
+}
+
+.err-msg:not(:empty) {
+    background-color: pink;
+    color: red;
+    border: 1px solid salmon;
+    padding: 10px;
+    border-radius: .5em;
 }
 .bloody{
     color : red;
@@ -211,34 +246,27 @@ i{
     font-weight: normal;
 }
 #notify{
-    position : absolute;
-    bottom : 10px;
-    left: -30%;
-    width : 30%;
+    position: absolute;
+    bottom: 20px;
+    transform: translateX(-105%);
+    left: 0;
+    width: min(400px, 70%);
     background-color: white;
-    border-radius: 10px;
-    animation-duration:  3s;
-    animation-timing-function:  ease-in-out;
-    animation-fill-mode: forwards;
-    font-size: 15px;
+    border-radius: 1em;
+    animation-duration: 3s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: both;
 }
+
 @keyframes slideInOut{
-    0% {left: -30%;}
-    10% {left: 1%;}
-    80% {left: 1%;}
-    100% {left: -30%;}
+    0% {transform: translateX(-105%)}
+    20% {transform: translateX(10px)}
+    80% {transform: translateX(10px)}
+    100% {transform: translateX(-105%)}
 }
+
 #note-theme{
-    margin-top: 0px;
-    margin-bottom: 0px;
     height : 15px;
-}
-#noSabi{
-    font-size: 20px;
-    font-weight: bold;
-}
-#noSabi:hover{
-    animation : resizeGlow 100ms ease-in-out forwards;
 }
 #note{
     font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
@@ -247,6 +275,25 @@ i{
     margin-left: 20px;
     margin-bottom: 10px;
 }
+
+.history-rev {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #573a2e;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+/* 
+    &.hide {
+        display: flex;
+    } */
+}
+
 .rank{
     height: 70px;
     width : 25px;
@@ -268,21 +315,9 @@ i{
 }
 
 @media screen and (max-width: 800px){
-    .container{
-        height : 100vh;
-        width : 100%;
-        position: absolute;
-        background-image: url("chesspaper1.jpg");
-        background-size: cover;
-        background-repeat: no-repeat;
-    }
 
     table{
-        height: 100%;
         width: 100%;
-        text-align: center;
-        margin-right: auto;
-        margin-left: auto;
         box-shadow: 0px 0px 10px 10px #130a07;
         border-collapse: collapse;
     }
