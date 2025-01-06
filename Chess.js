@@ -1,7 +1,7 @@
 // preGame 
 document.getElementById("intro").classList.remove("hide");
 document.getElementById("noSabi").classList.remove("hide");
-document.getElementsByClassName("container")[0].style.filter = "blur(2px)";
+
 let nextOverlay = function(n){
     setTimeout(function() {
 
@@ -990,14 +990,14 @@ function play(arr){
 
         if( chessboard[a][b].classList.contains("captureable")){
             history.push( history.pop() + " and " + activePiece.id + " from " + prevPos +" to "+ finalPos);
-            console.log(history);
+            
         } else {
             history.push( activePiece.id + " from " + prevPos +" to "+ finalPos );
         }
         
-        if( checked ){
-            document.getElementById("checkAudio").play();
-        }
+        // if( checked ){
+        //     document.getElementById("checkAudio").play();
+        // }
         let makeUp = clearMakeUp();
 
         if (checked && makeUp == "done"){
@@ -1005,6 +1005,9 @@ function play(arr){
                 notify (`The ${inactiveSide} King has been CheckMated`, "red");
                 document.getElementById("ggAudio").play();
                 endGame(activeSide);
+
+            } else {
+                clearMakeUp();
             }
         }
         turn++;
@@ -1106,7 +1109,7 @@ let isPinned = function(side){
 
          // if the king is in a checked square
          if (chessboard[wk[0]][wk[1]].classList.contains("threattowhite")){
-            console.log("Pinned piece");
+            // console.log("Pinned piece");
             return "Pinned Piece";
         }
 
@@ -1123,7 +1126,7 @@ let isPinned = function(side){
         // if the king is on a checked square
         if (chessboard[bk[0]][bk[1]].classList.contains("threattoblack")){
             // say the king is on a check
-            console.log("Pinned black piece");
+            // console.log("Pinned black piece");
             return "Pinned Piece";
         }
     }
@@ -1171,7 +1174,7 @@ let isChecked = function (side){
         // if the king is on a checked square
         if (chessboard[bk[0]][bk[1]].classList.contains("threattoblack")){
             // say the king is on a check
-            console.log("black check");
+            // console.log("black check");
             return checkZone2;
         }
     } else {
@@ -1186,7 +1189,7 @@ let isChecked = function (side){
         });
         // if the king is in a checked square
         if (chessboard[wk[0]][wk[1]].classList.contains("threattowhite")){
-            console.log("white check");
+            // console.log("white check");
             return checkZone2;
         }
     }
@@ -1899,7 +1902,8 @@ let upgrade = function(newPiece){
 
     // add the promotion to history
     history.push( history.pop() + " and " + `${activePiece.id} promoted to ${newPiece}`);
-    console.log(history);
+    // console.log(history);
+
     chessboard[g][h].innerHTML = `<img id="${activePiece.id}" 
     onclick="select(${activePiece.id})" 
     src="${activePiece.dir}"
@@ -1939,7 +1943,7 @@ let upgrade = function(newPiece){
                     }
                 } else {
                     if (z[0]){
-                        console.log("not");
+                        // console.log("not");
                         return false 
                     }
                 }
@@ -1948,7 +1952,7 @@ let upgrade = function(newPiece){
         for ( i = 0; i < 8; i++){
             for( j = 0; j < 8; j++){
                 if ( chessboard[i][j].classList.contains("playable") || chessboard[i][j].classList.contains("captureable") ){
-                    console.log("not");
+                    // console.log("not");
                     clearMakeUp();
                     return false;
                 }
@@ -2007,7 +2011,7 @@ let upgrade = function(newPiece){
         for ( i = 7; i > 0; i--){
             for( j = 7; j > 0; j--){
                 if ( chessboard[i][j].classList.contains("playable") || chessboard[i][j].classList.contains("captureable") ){
-                    console.log([i,j]);
+                    // console.log([i,j]);
                     clearMakeUp();
                     return false;
                 }
