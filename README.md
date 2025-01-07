@@ -4,7 +4,7 @@
 Welcome to the Multiplayer Chess Game! This web-based chess game is inspired by the popular game Chess Titans. It allows two players to play chess against each other in real-time.
 
 ## Quick Play
-[Click to Play](https://raw.githack.com/DavidTimi1/Chess/chess1/Chess.html?min=1)
+[Click to Play](https://rawcdn.githack.com/DavidTimi1/Chess/64c39e35f42adec0175795ddaa860131c2ec0868/Chess.html?min=1)
 
 ## Features
 
