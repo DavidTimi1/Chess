@@ -102,7 +102,7 @@ function King(name){
 let whitePawn = Array(8);
 for (let i = 0; i < 8; i++){
     // +1 because of the 0-index needed for arrays
-    whitePawn[i+1] = new WPawn("white-pawn.png");
+    whitePawn[i+1] = new WPawn("assets/pieces/white-pawn.png");
     whitePawn[i+1].id = `whitePawn[${i+1}]`
     whitePawn[i+1].row = 1;
     whitePawn[i+1].col = i;
@@ -112,89 +112,89 @@ for (let i = 0; i < 8; i++){
 let blackPawn = Array(8);
 for (let i = 0; i < 8; i++){
     // +1 because of the 0-index needed for arrays
-    blackPawn[i+1] = new BPawn("black-pawn.png");
+    blackPawn[i+1] = new BPawn("assets/pieces/black-pawn.png");
     blackPawn[i+1].id = `blackPawn[${i+1}]`;
     blackPawn[i+1].row = 6;
     blackPawn[i+1].col = i;
 }
 
 // WHITE KNIGHTS
-let whiteKnight1 = new Knight("white-knight1.png");
+let whiteKnight1 = new Knight("assets/pieces/white-knight1.png");
 whiteKnight1.id = "whiteKnight1"
 whiteKnight1.row = 0;
 whiteKnight1.col = 1;
-let whiteKnight2 = new Knight("white-knight2.png");
+let whiteKnight2 = new Knight("assets/pieces/white-knight2.png");
 whiteKnight2.id = "whiteKnight2";
 whiteKnight2.row = 0;
 whiteKnight2.col = 6;
 
 // BLACK KNIGHTS
-let blackKnight1 = new Knight("black-knight1.png");
+let blackKnight1 = new Knight("assets/pieces/black-knight1.png");
 blackKnight1.id = "blackKnight1";
 blackKnight1.row = 7;
 blackKnight1.col = 6;
-let blackKnight2 = new Knight("black-knight2.png");
+let blackKnight2 = new Knight("assets/pieces/black-knight2.png");
 blackKnight2.id = "blackKnight2";
 blackKnight2.row = 7;
 blackKnight2.col = 1;
 
 // WHITE BISHOPS
-let whiteBishop1 = new Bishop("white-bishop.png");
+let whiteBishop1 = new Bishop("assets/pieces/white-bishop.png");
 whiteBishop1.id = "whiteBishop1";
 whiteBishop1.row = 0;
 whiteBishop1.col = 2;
-let whiteBishop2 = new Bishop("white-bishop.png");
+let whiteBishop2 = new Bishop("assets/pieces/white-bishop.png");
 whiteBishop2.id = "whiteBishop2";
 whiteBishop2.row = 0;
 whiteBishop2.col = 5;
 
 // BLACK BISHOPS
-let blackBishop1 = new Bishop("black-bishop.png");
+let blackBishop1 = new Bishop("assets/pieces/black-bishop.png");
 blackBishop1.id = "blackBishop1";
 blackBishop1.row = 7;
 blackBishop1.col = 5;
-let blackBishop2 = new Bishop("black-bishop.png");
+let blackBishop2 = new Bishop("assets/pieces/black-bishop.png");
 blackBishop2.id = "blackBishop2";
 blackBishop2.row = 7;
 blackBishop2.col = 2;
 
 // WHITE ROOKS
-let whiteRook1 = new Rook("white-rook.png");
+let whiteRook1 = new Rook("assets/pieces/white-rook.png");
 whiteRook1.id = "whiteRook1";
 whiteRook1.row = 0;
 whiteRook1.col = 0;
-let whiteRook2 = new Rook("white-rook.png");
+let whiteRook2 = new Rook("assets/pieces/white-rook.png");
 whiteRook2.id = "whiteRook2";
 whiteRook2.row = 0;
 whiteRook2.col = 7;
 
 // BLACK ROOKS
-let blackRook1 = new Rook("black-rook.png");
+let blackRook1 = new Rook("assets/pieces/black-rook.png");
 blackRook1.id = "blackRook1";
 blackRook1.row = 7;
 blackRook1.col = 7;
-let blackRook2 = new Rook("black-rook.png");
+let blackRook2 = new Rook("assets/pieces/black-rook.png");
 blackRook2.id = "blackRook2";
 blackRook2.row = 7;
 blackRook2.col = 0;
 
 // QUEENS
-let whiteQueen = new Queen("white-queen.png");
+let whiteQueen = new Queen("assets/pieces/white-queen.png");
 whiteQueen.id = "whiteQueen";
 whiteQueen.row = 0;
 whiteQueen.col = 3;
-let blackQueen = new Queen("black-queen.png");
+let blackQueen = new Queen("assets/pieces/black-queen.png");
 blackQueen.id = "blackQueen";
 blackQueen.row = 7;
 blackQueen.col = 3;
 
 // KINGS
-let whiteKing = new King("white-king.png");
+let whiteKing = new King("assets/pieces/white-king.png");
 whiteKing.id = "whiteKing";
 whiteKing.row = 0;
 whiteKing.col = 4;
 
-let blackKing = new King("black-king.png");
+let blackKing = new King("assets/pieces/black-king.png");
 blackKing.id = "blackKing";
 blackKing.row = 7;
 blackKing.col = 4;
@@ -1873,10 +1873,10 @@ let promote = function(){
     document.getElementById("side").style.color = activeSide;
     document.getElementById("side").style.textShadow = `5px 5px 4px ${inactiveSide}`;
 
-    document.getElementById("toQueen").innerHTML = `<img src = "${activeSide}-pawn-queen.png" style="width: 100px; height: 100px;" /> <br> <span style="font-size: 30px; color: ${inactiveSide}; text-shadow: 5px 5px 4px ${activeSide};"> Queen <span>`
-    document.getElementById("toRook").innerHTML = `<img src = "${activeSide}-pawn-rook.png" style="width: 100px; height: 100px;" /> <br> <span style="font-size: 30px; color: ${inactiveSide}; text-shadow: 5px 5px 4px ${activeSide};"> Rook <span>`
-    document.getElementById("toBishop").innerHTML = `<img src = "${activeSide}-pawn-bishop.png" style="width: 100px; height: 100px;" /> <br> <span style="font-size: 30px; color: ${inactiveSide}; text-shadow: 5px 5px 4px ${activeSide};"> Bishop <span>`
-    document.getElementById("toKnight").innerHTML = `<img src = "${activeSide}-pawn-knight.png" style="width: 100px; height: 100px;" /> <br> <span style="font-size: 30px; color: ${inactiveSide}; text-shadow: 5px 5px 4px ${activeSide};"> Knight <span>`
+    document.getElementById("toQueen").innerHTML = `<img src = "assets/pieces/${activeSide}-pawn-queen.png" style="width: 100px; height: 100px;" /> <br> <span style="font-size: 30px; color: ${inactiveSide}; text-shadow: 5px 5px 4px ${activeSide};"> Queen <span>`
+    document.getElementById("toRook").innerHTML = `<img src = "assets/pieces/${activeSide}-pawn-rook.png" style="width: 100px; height: 100px;" /> <br> <span style="font-size: 30px; color: ${inactiveSide}; text-shadow: 5px 5px 4px ${activeSide};"> Rook <span>`
+    document.getElementById("toBishop").innerHTML = `<img src = "assets/pieces/${activeSide}-pawn-bishop.png" style="width: 100px; height: 100px;" /> <br> <span style="font-size: 30px; color: ${inactiveSide}; text-shadow: 5px 5px 4px ${activeSide};"> Bishop <span>`
+    document.getElementById("toKnight").innerHTML = `<img src = "assets/pieces/${activeSide}-pawn-knight.png" style="width: 100px; height: 100px;" /> <br> <span style="font-size: 30px; color: ${inactiveSide}; text-shadow: 5px 5px 4px ${activeSide};"> Knight <span>`
 
     
     promoteModal.style.display = "flex";
@@ -2125,11 +2125,11 @@ let undo = function(){
                 promoted.col = promOld[1];
 
                 promoted.side == "white" ? promoted.piece = "wpawn": promoted.piece = "bpawn";
-                promoted.dir = promoted.side + "-pawn" + promoted.id.slice(-2,-1) + ".png";
+                promoted.dir = "assets/pieces/" + promoted.side + "-pawn" + promoted.id.slice(-2,-1) + ".png";
 
                 chessboard[promOld[0]][promOld[1]].innerHTML = `<img id="${promoted.id}" 
                 onclick="select(${promoted.id})" 
-                src="${promoted.side + "-pawn" + promoted.id.slice(-2,-1) + ".png"}"
+                src="assets/pieces/${promoted.side + "-pawn" + promoted.id.slice(-2,-1) + ".png"}"
                 style="width: 90%; height: 80%;"/>`;
             
             }
@@ -2155,11 +2155,11 @@ let undo = function(){
             chessboard[oldPos[0]][oldPos[1]].classList.add(side);
 
             side == "white" ? undoPiece.piece = "wpawn": undoPiece.piece = "bpawn";
-            undoPiece.dir = side + "-pawn" + undoPiece.id.slice(-2,-1) + ".png";
+            undoPiece.dir = "assets/pieces/" + side + "-pawn" + undoPiece.id.slice(-2,-1) + ".png";
 
             chessboard[oldPos[0]][oldPos[1]].innerHTML = `<img id="${undoPiece.id}" 
             onclick="select(${undoPiece.id})" 
-            src="${side + "-pawn" + undoPiece.id.slice(-2,-1) + ".png"}"
+            src="assets/pieces/${side + "-pawn" + undoPiece.id.slice(-2,-1) + ".png"}"
             style="width: 90%; height: 80%;"/>`;
 
         }
@@ -2177,7 +2177,7 @@ let undo = function(){
 let endGame = function(activeSide){
     chessBg[0].style.filter = "blur(5px)";
     document.getElementById("winner").innerText = activeSide.toUpperCase();
-    document.getElementById("mateImg-bag").innerHTML = `<img id="mateImg" src= "${activeSide}Checkmate.jpg" />`;
+    document.getElementById("mateImg-bag").innerHTML = `<img id="mateImg" src= "assets/${activeSide}Checkmate.jpg" />`;
     document.getElementById("winner").style.color = activeSide;
     document.getElementById("winner").style.textShadow = `0px 0px 7px ${inactiveSide}`;
     document.getElementById("end-overlay").style.display = "flex";

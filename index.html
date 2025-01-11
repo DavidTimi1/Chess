@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Multiplayer Chess Game</title>
+    <link rel="stylesheet" href="Chess.css">
+    <link rel="icon" href="assets/pieces/white-queen.png" type="image/x-icon">
+
+    <link rel="preload" href="assets/chesspaper1.jpg" as="image">
+    <link rel="prefetch" href="assets/audio/select.mp3" as="media"></link>
+    <link rel="prefetch" href="assets/audio/play.mp3" as="media"></link>
+
+    <!-- prefetch pieces -->
+    <link rel="prefetch" href="assets/pieces/black-pawn.png" as="image">
+    <link rel="prefetch" href="assets/pieces/black-bishop.png" as="image">
+    <link rel="prefetch" href="assets/pieces/black-knight1.png" as="image">
+    <link rel="prefetch" href="assets/pieces/black-knight2.png" as="image">
+    <link rel="prefetch" href="assets/pieces/black-rook.png" as="image">
+    <link rel="prefetch" href="assets/pieces/black-queen.png" as="image">
+    <link rel="prefetch" href="assets/pieces/black-king.png" as="image">
+    
+    <link rel="prefetch" href="assets/pieces/white-pawn.png" as="image">
+    <link rel="prefetch" href="assets/pieces/white-bishop.png" as="image">
+    <link rel="prefetch" href="assets/pieces/white-knight1.png" as="image">
+    <link rel="prefetch" href="assets/pieces/white-knight2.png" as="image">
+    <link rel="prefetch" href="assets/pieces/white-rook.png" as="image">
+    <link rel="prefetch" href="assets/pieces/white-queen.png" as="image">
+    <link rel="prefetch" href="assets/pieces/white-king.png" as="image">
+
+    <meta property="og:title" content="2D Multiplayer Chess Game">
+    <meta property="og:description" content="Multiplayer web-based Chess Game. Enjoy playing chess with your friends!">
+    <meta property="og:image" content="assets/chesspaper1.jpg">
+    <meta property="og:url" content="https://raw.githack.com/DavidTimi1/Chess/chess1/Chess.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="2D Multiplayer Chess Game">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@DavidTimi_1">
+    <meta name="twitter:creator" content="@DavidTimi_1">
+    <meta name="twitter:title" content="2D Multiplayer Chess Game">
+    <meta name="twitter:description" content="Multiplayer web-based Chess Game. Enjoy playing chess with your friends!">
+    <meta name="twitter:image" content="assets/chesspaper1.jpg">
+    <meta name="twitter:url" content="https://raw.githack.com/DavidTimi1/Chess/chess1/Chess.html">
+
+    <!-- <script src="https://kit.fontawesome.com/9564db1e37.js" crossorigin="anonymous"></script> -->
+    <script src="9564db1e37.js"></script>
+</head>
+<body>
+    <div class="container">
+    </div>
+        <div id="preGame-overlay">
+            <div id="intro" class="pregame hide">
+                <h1 id="intro-head">
+                    2D <br>
+                    MULTIPLAYER <br>
+                    CHESS GAME
+                </h1>
+                <button class = introbut onclick= "nextOverlay(1)">PLAY</button>
+            </div>
+            <div id="creator" class="pregame hide">
+                <div id="likemessage" class="err-msg"></div>
+                <h2>
+                    CREATED BY <span id="effects">DAVID 😁</span>   
+                </h2>
+                <div class="feed-opts">
+                    <button class="creatorbut" onclick="nextOverlay(2)">👍</button>
+                    <button class="creatorbut" onclick="nextOverlay('creator')">👎</button>
+                </div>
+            </div>
+            <div id="startGame" class="pregame hide">
+                <h1 id="intro-head">
+                    BEGIN GAME
+                </h1>
+                <button class = startbut onclick="startGame()">START GAME</button>
+                
+                <div id="noSabi">
+                    <a href="https://www.wikihow.com/Play-Chess" target="_blank">
+                        <em> Don't know how to play? </em> 
+                    </a>
+                </div>
+            </div>
+
+
+        </div>
+        <audio src="assets/audio/select.mp3" id="selectAudio"></audio>
+        <audio src="assets/audio/play.mp3" id="playAudio"></audio>
+        <audio src="assets/audio/capture.mp3" id="captureAudio"></audio>
+        <audio src="assets/audio/check.mp3" id="checkAudio"></audio>
+        <audio src="assets/audio/reverse.mp3" id="reverseAudio"></audio>
+        <audio src="assets/audio/arrange.mp3" id="arrangeAudio"></audio>
+        <audio src="assets/audio/gg.mp3" id="ggAudio"></audio>
+        <audio src="assets/audio/letsgo.mp3" id="letsgoAudio"></audio>
+        <audio src="assets/audio/error.mp3" id="errorAudio"></audio>
+
+        <div class="board-container">
+            <table id="chessboard" class = "hide">
+                <tr class="columns">
+                    <td class="file edge"></td>
+                    <td class="file">A</td>
+                    <td class="file">B</td>
+                    <td class="file">C</td>
+                    <td class="file">D</td>
+                    <td class="file">E</td>
+                    <td class="file">F</td>
+                    <td class="file">G</td>
+                    <td class="file">H</td>
+                    <td class="file edge"></td>
+                </tr>
+                <tr class="row8">
+                    <td class="rank">8</td>
+                    <td class="dark-sqr columnA row8 col1" onclick="question(7,0)"></td>
+                    <td class="light-sqr columnB row8 col2" onclick="question(7,1)"></td>
+                    <td class="dark-sqr columnC row8 col3" onclick="question(7,2)"></td>
+                    <td class="light-sqr columnD row8 col4" onclick="question(7,3)"></td>
+                    <td class="dark-sqr columnE row8 col5" onclick="question(7,4)"></td>
+                    <td class="light-sqr columnF row8 col6" onclick="question(7,5)"></td>
+                    <td class="dark-sqr columnG row8 col7" onclick="question(7,6)"></td>
+                    <td class="light-sqr columnH row8 col8" onclick="question(7,7)"></td>
+                    <td class="rank">8</td>
+                </tr>
+                <tr class="row7">
+                    <td class="rank">7</td>
+                    <td class="light-sqr columnA row7 col1" onclick="question(6,0)"></td>
+                    <td class="dark-sqr columnB row7 col2" onclick="question(6,1)"></td>
+                    <td class="light-sqr columnC row7 col3" onclick="question(6,2)"></td>
+                    <td class="dark-sqr columnD row7 col4" onclick="question(6,3)"></td>
+                    <td class="light-sqr columnE row7 col5" onclick="question(6,4)"></td>
+                    <td class="dark-sqr columnF row7 col6" onclick="question(6,5)"></td>
+                    <td class="light-sqr columnG row7 col7" onclick="question(6,6)"></td>
+                    <td class="dark-sqr columnH row7 col8" onclick="question(6,7)"></td>
+                    <td class="rank">7</td>
+                </tr>
+                <tr class="row6">
+                    <td class="rank">6</td>
+                    <td class="dark-sqr columnA row6 col1" onclick="question(5,0)"></td>
+                    <td class="light-sqr columnB row6 col2" onclick="question(5,1)"></td>
+                    <td class="dark-sqr columnC row6 col3" onclick="question(5,2)"></td>
+                    <td class="light-sqr columnD row6 col4" onclick="question(5,3)"></td>
+                    <td class="dark-sqr columnE row6 col5" onclick="question(5,4)"></td>
+                    <td class="light-sqr columnF row6 col6" onclick="question(5,5)"></td>
+                    <td class="dark-sqr columnG row6 col7" onclick="question(5,6)"></td>
+                    <td class="light-sqr columnH row6 col8" onclick="question(5,7)"></td>
+                    <td class="rank">6</td>
+                </tr>
+                <tr class="row5">
+                    <td class="rank">5</td>
+                    <td class="light-sqr columnA row5 col1" onclick="question(4,0)"></td>
+                    <td class="dark-sqr columnB row5 col2" onclick="question(4,1)"></td>
+                    <td class="light-sqr columnC row5 col3" onclick="question(4,2)"></td>
+                    <td class="dark-sqr columnD row5 col4" onclick="question(4,3)"></td>
+                    <td class="light-sqr columnE row5 col5" onclick="question(4,4)"></td>
+                    <td class="dark-sqr columnF row5 col6" onclick="question(4,5)"></td>
+                    <td class="light-sqr columnG row5 col7" onclick="question(4,6)"></td>
+                    <td class="dark-sqr columnH row5 col8" onclick="question(4,7)"></td>
+                    <td class="rank">5</td>
+                </tr>
+                <tr class="row4">
+                    <td class="rank">4</td>
+                    <td class="dark-sqr columnA row4 col1" onclick="question(3,0)"></td>
+                    <td class="light-sqr columnB row4 col2" onclick="question(3,1)"></td>
+                    <td class="dark-sqr columnC row4 col3" onclick="question(3,2)"></td>
+                    <td class="light-sqr columnD row4 col4" onclick="question(3,3)"></td>
+                    <td class="dark-sqr columnE row4 col5" onclick="question(3,4)"></td>
+                    <td class="light-sqr columnF row4 col6" onclick="question(3,5)"></td>
+                    <td class="dark-sqr columnG row4 col7" onclick="question(3,6)"></td>
+                    <td class="light-sqr columnH row4 col8" onclick="question(3,7)"></td>
+                    <td class="rank">4</td>
+                </tr>
+                <tr class="row3">
+                    <td class="rank">3</td>
+                    <td class="light-sqr columnA row3 col1" onclick="question(2,0)"></td>
+                    <td class="dark-sqr columnB row3 col2" onclick="question(2,1)"></td>
+                    <td class="light-sqr columnC row3 col3" onclick="question(2,2)"></td>
+                    <td class="dark-sqr columnD row3 col4" onclick="question(2,3)"></td>
+                    <td class="light-sqr columnE row3 col5" onclick="question(2,4)"></td>
+                    <td class="dark-sqr columnF row3 col6" onclick="question(2,5)"></td>
+                    <td class="light-sqr columnG row3 col7" onclick="question(2,6)"></td>
+                    <td class="dark-sqr columnH row3 col8" onclick="question(2,7)"></td>
+                    <td class="rank">3</td>
+                </tr>
+                <tr class="row2">
+                    <td class="rank">2</td>
+                    <td class="dark-sqr columnA row2 col1" onclick="question(1,0)"></td>
+                    <td class="light-sqr columnB row2 col2" onclick="question(1,1)"></td>
+                    <td class="dark-sqr columnC row2 col3" onclick="question(1,2)"></td>
+                    <td class="light-sqr columnD row2 col4" onclick="question(1,3)"></td>
+                    <td class="dark-sqr columnE row2 col5" onclick="question(1,4)"></td>
+                    <td class="light-sqr columnF row2 col6" onclick="question(1,5)"></td>
+                    <td class="dark-sqr columnG row2 col7" onclick="question(1,6)"></td>
+                    <td class="light-sqr columnH row2 col8" onclick="question(1,7)"></td>
+                    <td class="rank">2</td>
+                </tr>
+                <tr class="row1">
+                    <td class="rank">1</td>
+                    <td class="light-sqr columnA row1 col1" onclick="question(0,0)"></td>
+                    <td class="dark-sqr columnB row1 col2" onclick="question(0,1)"></td>
+                    <td class="light-sqr columnC row1 col3" onclick="question(0,2)"></td>
+                    <td class="dark-sqr columnD row1 col4" onclick="question(0,3)"></td>
+                    <td class="light-sqr columnE row1 col5" onclick="question(0,4)"></td>
+                    <td class="dark-sqr columnF row1 col6" onclick="question(0,5)"></td>
+                    <td class="light-sqr columnG row1 col7" onclick="question(0,6)"></td>
+                    <td class="dark-sqr columnH row1 col8" onclick="question(0,7)"></td>
+                    <td class="rank">1</td>
+                </tr>
+                <tr class="columns">
+                    <td class="file edge"></td>
+                    <td class="file">A</td>
+                    <td class="file">B</td>
+                    <td class="file">C</td>
+                    <td class="file">D</td>
+                    <td class="file">E</td>
+                    <td class="file">F</td>
+                    <td class="file">G</td>
+                    <td class="file">H</td>
+                    <td class="file edge"></td>
+                </tr>
+        
+            </table>
+        </div>
+
+        <label class="history-rev hide" onclick="undo()">
+            <i class="fas fa-undo" role="button"></i>
+            <span id="mini"> Undo Move </span></i>
+        </label>
+
+    <div id="promote-overlay">
+        <h1><span id ="side"></span> HAS BEEN PROMOTED !!</h1>
+        <h2> Choose your Promotion Piece </h2>
+        <div id="promotion" class="flex-container">
+            <span id="toQueen" onclick="upgrade('queen')">
+                q
+            </span>
+            <span id="toRook" onclick="upgrade('rook')">
+                r
+            </span>
+            <span id="toBishop" onclick="upgrade('bishop')">
+                b
+            </span>
+            <span id="toKnight" onclick="upgrade('knight')">
+                n
+            </span>
+            <span style="font-size: larger;"></span>
+        </div>
+    </div>
+
+    <div id="end-overlay">
+        <h1 class = "bloody">CHECKMATE</h1>
+        <h1><span id ="winner"></span> HAS WON !!</h1>
+        <div id="end" class="flex-container">
+            <span id="mateImg-bag"></span>
+        </div>
+        <button class = startbut id="replay">PLAY AGAIN</button>
+    </div>
+
+    <div id="notify">
+        <div id="note-theme"></div>
+            <div id="note">
+            </div>
+
+    </div>
+    
+</body>
+<script src="Chess.js"></script>
+</html>
