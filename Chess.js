@@ -10,7 +10,7 @@ let nextOverlay = function(n){
             document.getElementById("likemessage").innerText = " You have to like to play :) ";
             document.getElementById("errorAudio").play();
         }
-        for (i = 0; i < n ; i++){
+        for (let i = 0; i < n ; i++){
             document.getElementsByClassName("pregame")[i].classList.add("hide");
         }
         document.getElementsByClassName("pregame")[n].classList.remove("hide");
@@ -20,7 +20,7 @@ let nextOverlay = function(n){
 
 
 
-
+const playerActions = ["playable", "captureable", "promotable", "castleable"];
 
 
 
@@ -96,6 +96,7 @@ function King(name){
     this.row = "";
     this.col = "";
     this.side = "";
+    this.canCastle = true;
 }
 
 // WHITE PAWNS CREATION USING OBJECT CONSTRUCTOR
@@ -202,7 +203,7 @@ blackKing.col = 4;
 
 // ARRAY FOR ALL WHITE PIECES
 let whitePieces = Array(16)
-for ( i = 0; i < 8; i++){
+for ( let i = 0; i < 8; i++){
     whitePieces[i] = whitePawn[i+1];
 }
 whitePieces[8] = whiteKnight1;
@@ -216,7 +217,7 @@ whitePieces[15] = whiteKing;
 
 // ARRAY FOR ALL BLACK PIECES
 let blackPieces = Array(16)
-for ( i = 0; i < 8; i++){
+for ( let i = 0; i < 8; i++){
     blackPieces[i] = blackPawn[i+1];
 }
 blackPieces[8] = blackKnight1;
@@ -245,7 +246,7 @@ for (let i = 0; i < 8; i++){
 }
 
 // assigning indexes for all cells (chess squares)
-for ( i = 0; i < 8; i++){
+for ( let i = 0; i < 8; i++){
     for( j = 0; j < 8; j++){
         chessboard[i][j] = document.querySelector(`.row${i+1}.col${j+1}`);
     }
@@ -254,7 +255,7 @@ for ( i = 0; i < 8; i++){
 let capturedWhite = [];
 let capturedBlack = [];
 
-let history = [];
+let appHistory = [];
 
 // arranging the pieces on start of the game
 function arrangePieces(){
@@ -301,7 +302,7 @@ startGame = function(){
     arrangePieces();
     
     setTimeout( function (){
-        for (i = 0; i < 3 ; i++){
+        for (let i = 0; i < 3 ; i++){
             document.getElementsByClassName("pregame")[i].classList.add("hide");
         }
         document.getElementById("noSabi").classList.add("hide");
@@ -319,17 +320,9 @@ let activeSide= "white";
 let inactiveSide = "black";
 
 let clearMakeUp = function (){
-    for ( i = 0; i < 8; i++){
+    for ( let i = 0; i < 8; i++){
         for( j = 0; j < 8; j++){
-            if ( chessboard[i][j].classList.contains("playable") ){
-                chessboard[i][j].classList.remove("playable");
-            }
-            if ( chessboard[i][j].classList.contains("captureable") ){
-                chessboard[i][j].classList.remove("captureable");
-            }
-            if ( chessboard[i][j].classList.contains("promotable") ){
-                chessboard[i][j].classList.remove("promotable");
-            }
+            chessboard[i][j].classList.remove(...playerActions, "activated");
         }
     }
     return "done";
@@ -345,21 +338,13 @@ let question = function(k,l){
         inactiveSide = "black";
     }
 
-    if (chessboard[k][l].classList.contains("playable") 
-    || chessboard[k][l].classList.contains("promotable")){
+    if (chessboard[k][l].classList.contains("activated")) return
 
+
+    if ( playerActions.some( className => chessboard[k][l].classList.contains(className)) )
         play([k,l]);
 
-    } else if (chessboard[k][l].classList.contains("captureable")){
-
-        play([k,l]);
-
-        return "captureable";
-    } else if ( chessboard[k][l].classList.contains("activated") ) {
-
-        // console.log("It is an active cell");
-
-    } else if ( chessboard[k][l].classList.contains(inactiveSide) ) {
+    else if ( chessboard[k][l].classList.contains(inactiveSide) ) {
 
         notify (`Invalid Selection 
         ${activeSide.toUpperCase()} to play`, "yellow");
@@ -367,22 +352,11 @@ let question = function(k,l){
         return;
 
     } else {
-        notify(`Invalid Play
-        The selected square is inactive`, "yellow");
-        document.getElementById("errorAudio").play();
-
-        // clear the remove the former selection
         clearMakeUp();
-        for ( i = 0; i < 8; i++){
-            for( j = 0; j < 8; j++){
-                if ( chessboard[i][j].classList.contains("activated") ){
-                    chessboard[i][j].classList.remove("activated");
-                }
-            }
-        }
     }
 
 }
+
 // MOVEMENT OPTIONS
 let select = function(id){
     if (chessboard[id.row][id.col].classList.contains("captureable")){
@@ -390,13 +364,6 @@ let select = function(id){
     }
     // clear the remove the former selection
     clearMakeUp();
-    for ( i = 0; i < 8; i++){
-        for( j = 0; j < 8; j++){
-            if ( chessboard[i][j].classList.contains("activated") ){
-                chessboard[i][j].classList.remove("activated");
-            }
-        }
-    }
     
     if (turn % 2){
         activeSide = "black";
@@ -417,16 +384,15 @@ let select = function(id){
 
     showPlays(id);
 
-    return(activePiece)
+    return activePiece
 }
 
-    
-    // if ( checked ){
-    // let checkZone = scope(id, eval(activeSide + "King"), activeSide);
-    // console.log(checkZone);
-    // }
 
-showPlays = function (id){
+const showPlays = function (id){
+    /**
+     * Llist all possible plays by NORMAL PLAY, CAPTURE, PROMOTE
+     */
+
     let type = id.piece;
     let row = id.row;
     let column = id.col;
@@ -438,140 +404,160 @@ showPlays = function (id){
     let checkBlock = [playable,captureable, promotable];
 
     chessboard[row][column].classList.add("activated");
+    
     // based on the type of piece, different movement ways
     switch(type){
 
        
         case "wpawn" :  // if a WHITE PAWN and the space in front is empty
-        if (row < 7){
-            for ( let i = row + 1, j = column; i <= row + 2; i++){
-                if (!chessboard[i][j].classList.contains("occupied")){
-                    
-                // the pawn 'CAN' move there otherwise it can't move
-                    chessboard[i][j].classList.add("playable");
-                    playable.push([i,j]);
-        
-                    if ( i == 2 ){
-                        continue
-                    } else if ( i == 7 ){
-                        chessboard[i][j].classList.add("promotable");
-                        promotable.push([i,j]);
+            if (row < 7){
+                for ( let i = row + 1, j = column; i <= row + 2; i++){
+                    if (!chessboard[i][j].classList.contains("occupied")){
+                        
+                    // the pawn 'CAN' move there otherwise it can't move
+                        chessboard[i][j].classList.add("playable");
+                        playable.push([i,j]);
             
-                    } else {break}
-                } else {break}
-            }
-            // if it can capture an opposing piece diagonal from it
-            for ( i = row + 1, j = column - 1; i <= 7 && j <= 7 && j <= column + 1; j++){
-                if( j == column || j < 0 ){ 
-                    continue;
-                } else if ( chessboard[i][j].classList.contains("occupied") 
-                && chessboard[i][j].classList.contains("black"))
-                {
-                    if (!chessboard[i][j].classList.contains("throne")){
-                        chessboard[i][j].classList.add("captureable");
-                        captureable.push([i,j]);
-                
+                        if ( i == 2 )
+                            continue
+
                         if ( i == 7 ){
-                        chessboard[i][j].classList.add("promotable");
-                        promotable.push([i,j]);
-        
+                            chessboard[i][j].classList.add("promotable");
+                            promotable.push([i,j]);
+                
+                        } else break
+
+                    } else break
+                }
+
+                // if it can capture an opposing piece diagonal from it
+                for ( let i = row + 1, j = column - 1; i <= 7 && j <= 7 && j <= column + 1; j++){
+                    if ( j == column || j < 0 )
+                        continue;
+
+                    if ( 
+                        chessboard[i][j].classList.contains("occupied") 
+                        && chessboard[i][j].classList.contains("black")
+
+                    ){
+                        // can't capture the king
+                        if (!chessboard[i][j].classList.contains("throne")){
+                            chessboard[i][j].classList.add("captureable");
+                            captureable.push([i,j]);
+                    
+                            if ( i == 7 ){
+                                chessboard[i][j].classList.add("promotable");
+                                promotable.push([i,j]);
+                            }
                         }
                     }
                 }
             }
-        }
-            break;
+        break;
 
             
         case "bpawn": // IF IT IS A BLACK PAWN
-        if (row > 0){
-            for ( let i = row - 1, j = column; i >= row - 2; i--){
-                if (!chessboard[i][j].classList.contains("occupied")){
+            if (row > 0){
+
+                for ( let i = row - 1, j = column; i >= row - 2; i-- ){
+                    if (!chessboard[i][j].classList.contains("occupied")){
+                        // the pawn 'CAN' move there otherwise it can't move
+                        chessboard[i][j].classList.add("playable");
+                        playable.push([i,j]);
             
-            // the pawn 'CAN' move there otherwise it can't move
-                chessboard[i][j].classList.add("playable");
-                playable.push([i,j]);
-    
-                if ( row == 6 ){
-                    continue
-                } else if ( row == 1 ){
-                    chessboard[i][j].classList.add("promotable");
-                    promotable.push([i,j]);
-        
-                } else {break}
-            } else {break}
-        }
-            // if it can capture an opposing piece diagonal from it
-            for ( i = row - 1, j = column - 1; i >= 0 && j <= 7 && j <= column + 1; j++ ){
-                if ( j == column || j < 0){
-                    continue;
-                } else if ( chessboard[i][j].classList.contains("occupied") 
-                && chessboard[i][j].classList.contains("white") )
-                {
-                    if (!chessboard[i][j].classList.contains("throne")){
-                        chessboard[i][j].classList.add("captureable");
-                        captureable.push([i,j]);
+                        if ( row == 6 )
+                            continue
+
                         if ( row == 1 ){
                             chessboard[i][j].classList.add("promotable");
                             promotable.push([i,j]);
-        
+                
+                        } else break
+
+                    } else break
+                }
+
+                // if it can capture an opposing piece diagonal from it
+                for ( let i = row - 1, j = column - 1; i >= 0 && j <= 7 && j <= column + 1; j++ ){
+                    if ( j == column || j < 0)
+                        continue;
+
+                    if ( 
+                        chessboard[i][j].classList.contains("occupied") 
+                        && chessboard[i][j].classList.contains("white") 
+                    ){
+                        if (!chessboard[i][j].classList.contains("throne")){
+                            chessboard[i][j].classList.add("captureable");
+                            captureable.push([i,j]);
+
+                            if ( row == 1 ){
+                                chessboard[i][j].classList.add("promotable");
+                                promotable.push([i,j]);
+            
+                            }
                         }
                     }
                 }
             }
-        }
 
-            break;
+        break;
+
 
         case "knight" : // FOR A KNIGHT
-        let a = 2;
-        let b = 1;
-        let Nmoves = [row + a,column + b,row - a,column - b,row + b,column + a,row - b,column - a,row + a,column - b,row - a,column + b,row + b,column - a,row - b,column + a]
-        let size = Nmoves.length;
-        for ( i = 0; i < size - 1; i += 2 ){
-            if ( Nmoves[i] >= 0 && Nmoves[i+1] >= 0 && Nmoves[i] <= 7 && Nmoves[i+1] <= 7 ){
+            let a = 2;
+            let b = 1;
+            let Nmoves = [row + a, column + b, row - a, column - b, row + b, column + a, row - b, column - a, row + a, column - b, row - a, column + b, row + b, column - a, row - b, column + a]
+            let movesLength = Nmoves.length;
 
-                r = Nmoves[i];
-                c = Nmoves[i+1];
-                if (chessboard[r][c].classList.contains("occupied") 
-                && chessboard[r][c].classList.contains(id.side))
-                {
-                    continue;
-                } else if (!chessboard[r][c].classList.contains("occupied")){
-                    
-                    chessboard[r][c].classList.add("playable");
-                    playable.push([r,c]);
-                } else { 
-                    
-                    chessboard[r][c].classList.add("captureable");
-                    captureable.push([r,c]);
+            for ( let i = 0; i < movesLength - 1; i += 2 ){
+                if ( Nmoves[i] >= 0 && Nmoves[i+1] >= 0 && Nmoves[i] <= 7 && Nmoves[i+1] <= 7 ){
+
+                    r = Nmoves[i];
+                    c = Nmoves[i+1];
+
+                    if (
+                        chessboard[r][c].classList.contains("occupied") 
+                        && chessboard[r][c].classList.contains(id.side)
+                    ) continue;
+
+                    if (!chessboard[r][c].classList.contains("occupied")){
+                        chessboard[r][c].classList.add("playable");
+                        playable.push([r,c]);
+
+                    } else { 
+                        chessboard[r][c].classList.add("captureable");
+                        captureable.push([r,c]);
+                    }
                 }
+    
             }
-
-        }
         break;
 
         case "bishop" :  // GOING DIAGONALLY UPWARDS TO THE RIGHT
-            for (i = row + 1, j = column + 1; i <= 7 && j <= 7; i++ ){
+            for (let i = row + 1, j = column + 1; i <= 7 && j <= 7; i++ ){
                 if ( !chessboard[i][j].classList.contains("occupied") ){
     
                     chessboard[i][j].classList.add("playable");
                     playable.push([i,j]);
                 
-                } else if (chessboard[i][j].classList.contains("occupied") 
-                && !chessboard[i][j].classList.contains(id.side))
-                {
+                } else if (
+                    chessboard[i][j].classList.contains("occupied") 
+                    && !chessboard[i][j].classList.contains(id.side)
+                ){
                     if (!chessboard[i][j].classList.contains("throne")){
                         chessboard[i][j].classList.add("captureable");
                         captureable.push([i,j]);
                     }
+
                     break;
-                } else { break }
+
+                } else break;
+
                 j++;
             }
     
                 // GOING DIAGONALLY DOWNWARDS TO THE RIGHT
-                for (i = row - 1, j = column + 1; i >= 0 && j <= 7; i-- ){
+                for (let i = row - 1, j = column + 1; i >= 0 && j <= 7; i-- ){
                     if ( !chessboard[i][j].classList.contains("occupied") ){
                         chessboard[i][j].classList.add("playable");
                         playable.push([i,j]);
@@ -589,7 +575,7 @@ showPlays = function (id){
                 }
     
                 // GOING DIAGONALLY UPWARDS THE LEFT
-                for (i = row + 1, j = column - 1; i <= 7 && j >= 0; i++ ){
+                for (let i = row + 1, j = column - 1; i <= 7 && j >= 0; i++ ){
                     if ( !chessboard[i][j].classList.contains("occupied") ){
                         chessboard[i][j].classList.add("playable");
                         playable.push([i,j]);
@@ -607,7 +593,7 @@ showPlays = function (id){
                 }
     
                 // GOING DIAGONALLY DOWNWARDS TO THE LEFT
-                for (i = row - 1, j = column - 1; i >= 0 && j >= 0; i-- ){
+                for (let i = row - 1, j = column - 1; i >= 0 && j >= 0; i-- ){
                     if ( !chessboard[i][j].classList.contains("occupied") ){
                         chessboard[i][j].classList.add("playable");
                         playable.push([i,j]);
@@ -628,24 +614,26 @@ showPlays = function (id){
 
         // MOVEMENT FOR THE ROOK
         case "rook" : // THE COLUMN UPWARDS
-            for (i = row + 1, j = column; i <= 7; i++ ){
+            for (let i = row + 1, j = column; i <= 7; i++ ){
                 if ( !chessboard[i][j].classList.contains("occupied") ){
                     chessboard[i][j].classList.add("playable");
                     playable.push([i,j]);
                 
-                } else if (chessboard[i][j].classList.contains("occupied") 
-                && !chessboard[i][j].classList.contains(id.side))
-                {
+                } else if (
+                    chessboard[i][j].classList.contains("occupied") 
+                    && !chessboard[i][j].classList.contains(id.side)
+                ){
                     if (!chessboard[i][j].classList.contains("throne")){
                         chessboard[i][j].classList.add("captureable");
                         captureable.push([i,j]);
                     }
+
                     break;
-                } else { break }
+                } else break;
             }
 
             // SAME COLUMN DOWNWARDS
-            for (i = row - 1, j = column; i >= 0; i-- ){
+            for (let i = row - 1, j = column; i >= 0; i-- ){
                 if ( !chessboard[i][j].classList.contains("occupied") ){
                     chessboard[i][j].classList.add("playable");
                     playable.push([i,j]);
@@ -662,7 +650,7 @@ showPlays = function (id){
             }
 
             // SAME ROW BACKWARDS
-            for (i = row, j = column - 1; j >= 0; j-- ){
+            for (let i = row, j = column - 1; j >= 0; j-- ){
                 if ( !chessboard[i][j].classList.contains("occupied") ){
                     chessboard[i][j].classList.add("playable");
                     playable.push([i,j]);
@@ -679,7 +667,7 @@ showPlays = function (id){
             }
 
             // SAME ROW FORWARDS
-            for (i = row, j = column + 1; j <= 7; j++ ){
+            for (let i = row, j = column + 1; j <= 7; j++ ){
                 if ( !chessboard[i][j].classList.contains("occupied") ){
                     chessboard[i][j].classList.add("playable");
                     playable.push([i,j]);
@@ -697,206 +685,255 @@ showPlays = function (id){
 
         break;
 
-// THE QUEEN'S MOVEMENT IS SIMPLY THE COMBINATION OF A ROOK AND A BISHOP
+        // THE QUEEN'S MOVEMENT IS SIMPLY THE COMBINATION OF A ROOK AND A BISHOP
         case "queen": 
         
-        // MOVEMENT LIKE THE BISHOP
-        for (i = row + 1, j = column + 1; i <= 7 && j <= 7; i++ ){
-            // GOING DIAGONALLY UPWARDS TO THE RIGHT
-            if ( !chessboard[i][j].classList.contains("occupied") ){
-                chessboard[i][j].classList.add("playable");
-                playable.push([i,j]);
-            
-            } else if (chessboard[i][j].classList.contains("occupied") 
-            && !chessboard[i][j].classList.contains(id.side))
-            {
-                if (!chessboard[i][j].classList.contains("throne")){
-                    chessboard[i][j].classList.add("captureable");
-                    captureable.push([i,j]);
-                }
-                break;
-            } else { break }
-            j++;
-        }
+            // MOVEMENT LIKE THE BISHOP
+            for (let i = row + 1, j = column + 1; i <= 7 && j <= 7; i++ ){
+                // GOING DIAGONALLY UPWARDS TO THE RIGHT
+                if ( !chessboard[i][j].classList.contains("occupied") ){
+                    chessboard[i][j].classList.add("playable");
+                    playable.push([i,j]);
+                
+                } else if (
+                    chessboard[i][j].classList.contains("occupied") 
+                    && !chessboard[i][j].classList.contains(id.side)
+                ){
+                    if (!chessboard[i][j].classList.contains("throne")){
+                        chessboard[i][j].classList.add("captureable");
+                        captureable.push([i,j]);
+                    }
+
+                    break;
+                } else break;
+                
+                j++;
+            }
 
             // GOING DIAGONALLY DOWNWARDS TO THE RIGHT
-            for (i = row - 1, j = column + 1; i >= 0 && j <= 7; i-- ){
+            for (let i = row - 1, j = column + 1; i >= 0 && j <= 7; i-- ){
 
                 if ( !chessboard[i][j].classList.contains("occupied") ){
                     chessboard[i][j].classList.add("playable");
                     playable.push([i,j]);
                 
-                } else if (chessboard[i][j].classList.contains("occupied") 
-                && !chessboard[i][j].classList.contains(id.side))
-                {
+                } else if (
+                    chessboard[i][j].classList.contains("occupied") 
+                    && !chessboard[i][j].classList.contains(id.side)
+                ){
                     if (!chessboard[i][j].classList.contains("throne")){
                         chessboard[i][j].classList.add("captureable");
                         captureable.push([i,j]);
                     }
+
                     break;
-                } else { break }
+                } else break;
+
                 j++;
             }
 
             // GOING DIAGONALLY UPWARDS THE LEFT
-            for (i = row + 1, j = column - 1; i <= 7 && j >= 0; i++ ){
+            for (let i = row + 1, j = column - 1; i <= 7 && j >= 0; i++ ){
                 if ( !chessboard[i][j].classList.contains("occupied") ){
                     chessboard[i][j].classList.add("playable");
                     playable.push([i,j]);
                 
-                } else if (chessboard[i][j].classList.contains("occupied") 
-                && !chessboard[i][j].classList.contains(id.side))
-                {
+                } else if (
+                    chessboard[i][j].classList.contains("occupied") 
+                    && !chessboard[i][j].classList.contains(id.side)
+                ){
                     if (!chessboard[i][j].classList.contains("throne")){
                         chessboard[i][j].classList.add("captureable");
                         captureable.push([i,j]);
                     }
                     break;
-                } else { break }
+
+                } else break;
+
                 j--;
             }
 
             // GOING DIAGONALLY DOWNWARDS TO THE LEFT
-            for (i = row - 1, j = column - 1; i >= 0 && j >= 0; i-- ){
+            for (let i = row - 1, j = column - 1; i >= 0 && j >= 0; i-- ){
                 if ( !chessboard[i][j].classList.contains("occupied") ){
                     chessboard[i][j].classList.add("playable");
                     playable.push([i,j]);
                 
-                } else if (chessboard[i][j].classList.contains("occupied") 
-                && !chessboard[i][j].classList.contains(id.side))
-                {
+                } else if (
+                    chessboard[i][j].classList.contains("occupied") 
+                    && !chessboard[i][j].classList.contains(id.side)
+                ){
                     if (!chessboard[i][j].classList.contains("throne")){
                         chessboard[i][j].classList.add("captureable");
                         captureable.push([i,j]);
                     }
+
                     break;
-                } else { break }
+                } else break;
+
                 j--;
             }
 
 
-        // MOVEMENT LIKE THE ROOK
+            // MOVEMENT LIKE THE ROOK
             // THE COLUMN UPWARDS
-        for (i = row + 1, j = column; i <= 7; i++ ){
-            if ( !chessboard[i][j].classList.contains("occupied") ){
-                chessboard[i][j].classList.add("playable");
-                playable.push([i,j]);
-            
-            } else if (chessboard[i][j].classList.contains("occupied") 
-            && !chessboard[i][j].classList.contains(id.side))
-            {
-                if (!chessboard[i][j].classList.contains("throne")){
-                    chessboard[i][j].classList.add("captureable");
-                    captureable.push([i,j]);
-                }
-                break;
-            } else { break }
-        }
-
-            // SAME COLUMN DOWNWARDS
-            for (i = row - 1, j = column; i >= 0; i-- ){
+            for (let i = row + 1, j = column; i <= 7; i++ ){
                 if ( !chessboard[i][j].classList.contains("occupied") ){
                     chessboard[i][j].classList.add("playable");
                     playable.push([i,j]);
                 
-                } else if (chessboard[i][j].classList.contains("occupied") 
-                && !chessboard[i][j].classList.contains(id.side))
-                {
+                } else if (
+                    chessboard[i][j].classList.contains("occupied") 
+                    && !chessboard[i][j].classList.contains(id.side)
+                ){
+                    if (!chessboard[i][j].classList.contains("throne")){
+                        chessboard[i][j].classList.add("captureable");
+                        captureable.push([i,j]);
+                    }
+
+                    break;
+                } else break;
+            }
+
+            // SAME COLUMN DOWNWARDS
+            for (let i = row - 1, j = column; i >= 0; i-- ){
+                if ( !chessboard[i][j].classList.contains("occupied") ){
+                    chessboard[i][j].classList.add("playable");
+                    playable.push([i,j]);
+                
+                } else if (
+                    chessboard[i][j].classList.contains("occupied") 
+                    && !chessboard[i][j].classList.contains(id.side)
+                ){
                     if (!chessboard[i][j].classList.contains("throne")){
                         chessboard[i][j].classList.add("captureable");
                         captureable.push([i,j]);
                     }
                     break;
-                } else { break }
+
+                } else break;
             }
 
             // SAME ROW BACKWARDS
-            for (i = row, j = column - 1; j >= 0; j-- ){
+            for (let i = row, j = column - 1; j >= 0; j-- ){
                 if ( !chessboard[i][j].classList.contains("occupied") ){
                     chessboard[i][j].classList.add("playable");
                     playable.push([i,j]);
                 
-                } else if (chessboard[i][j].classList.contains("occupied") 
-                && !chessboard[i][j].classList.contains(id.side))
-                {
+                } else if (
+                    chessboard[i][j].classList.contains("occupied") 
+                    && !chessboard[i][j].classList.contains(id.side)
+                ){
                     if (!chessboard[i][j].classList.contains("throne")){
                         chessboard[i][j].classList.add("captureable");
                         captureable.push([i,j]);
                     }
                     break;
-                } else { break }
+
+                } else break;
             }
 
             // SAME ROW FORWARDS
-            for (i = row, j = column + 1; j <= 7; j++ ){
+            for (let i = row, j = column + 1; j <= 7; j++ ){
                 if ( !chessboard[i][j].classList.contains("occupied") ){
                     chessboard[i][j].classList.add("playable");
                     playable.push([i,j]);
                 
-                } else if (chessboard[i][j].classList.contains("occupied") 
-                && !chessboard[i][j].classList.contains(id.side))
-                {
+                } else if (
+                    chessboard[i][j].classList.contains("occupied") 
+                    && !chessboard[i][j].classList.contains(id.side)
+                ){
                     if (!chessboard[i][j].classList.contains("throne")){
                         chessboard[i][j].classList.add("captureable");
                         captureable.push([i,j]);
                     }
                     break;
-                } else { break }
+                } else break;
             }
 
         break;
 
         case "king" :  // THE KING MOVE 1 SQUARE IN ALL DIRECTIONS
-        Kloop1:
-        for ( let i = row+1; i >= row-1 && i >= 0; i--){
-            if ( i == 8 ){
-                continue Kloop1;
-            } else {
+            Kloop1:
+            for ( let i = row+1; i >= row-1 && i >= 0; i--){
+                if ( i == 8 )
+                    continue Kloop1;
+
                 Kloop2:
-                for ( j = column+1;  j >= 0 && j >= column-1; j-- ){
-                    if ( j == 8 || (i == row && j == column) 
-                    || chessboard[i][j].classList.contains('check') 
-                    || chessboard[i][j].classList.contains(`threatto${activeSide}`)){
+                for ( let j = column+1;  j >= 0 && j >= column-1; j-- ){
+                    if ( 
+                        j == 8 || (i == row && j == column) 
+                        || chessboard[i][j].classList.contains('check') 
+                        || chessboard[i][j].classList.contains(`threatto${activeSide}`)
+                    )
                         continue Kloop2;
-                    } else if ( !chessboard[i][j].classList.contains("occupied") ){
+                    
+                    if ( !chessboard[i][j].classList.contains("occupied") ){
 
                         chessboard[i][j].classList.add("playable");
                         kingPlay.push([i,j]);
                     
-                    } else if (chessboard[i][j].classList.contains("occupied") 
-                    && !chessboard[i][j].classList.contains(id.side))
-                    {
-                        if (!chessboard[i][j].classList.contains("throne") ){
-                            chessboard[i][j].classList.add("captureable");
-                            kingPlay.push([i,j]);
-                        }
+                    } else if (
+                        !chessboard[i][j].classList.contains(activeSide)
+                        && !chessboard[i][j].classList.contains("throne")
+                    ){
+                        chessboard[i][j].classList.add("captureable");
+                        kingPlay.push([i,j]);
                     }
                 }
             }
-        }
-        return(kingPlay);
+
+            // check if can castle
+            let king, pieces;
+            if (id.side === 'white'){
+                king = whiteKing;
+                pieces = whitePieces
+            } else {
+                king = blackKing;
+                pieces = blackPieces
+            }
+            if (!king.canCastle) break;
+
+            pieces.filter( p => p.piece === 'rook' && p.row === king.row && [0,7].includes(p.col))
+            .forEach( rook => {
+                const path = [king.col, rook.col].sort();
+                const pathSquares = chessboard[king.row].slice(path[0]+1, path[1]);
+                const resting = king.col <= 4? pathSquares[0]: [...pathSquares].pop();
+
+                // Ensure the resting square after castle doesn't contain threats to the active side
+                if (
+                    pathSquares.every(sq => !sq.classList.contains('occupied')
+                    && !resting.classList.contains(`threatto${activeSide}`))
+                ){
+                    const index = chessboard[king.row].indexOf(resting);
+                    chessboard[king.row][index].classList.add('castleable');
+                    kingPlay.push([king.row, index]);
+                }
+
+            })
+
+            return kingPlay;
     }
 
-    if ( checked && type != "king"){
+    if ( checked && type !== "king"){
 
         // clear the remove the former selection
         clearMakeUp();
         let scroll = [];
-        let len = checkZone2.length;
-        for ( element of checkBlock ){
-            let size = element.length;
-            for ( i = 1; i < size; i++){
-                let el = element[i];
-                for ( j = 0; j < len; j++){
-                    let zone = checkZone2[j]
-                    if ( el[0] == zone[0] && el[1] == zone[1] ){
-                        chessboard[el[0]][el[1]].classList.add(element[0]);
-                        scroll.push([el[0],el[1]])
+
+        for ( let block of checkBlock ){
+            for ( let i = 1; i < block.length; i++ ){
+                let [row, col] = block[i];
+
+                for ( let zone of checkZone2){
+                    if ( row == zone[0] && col == zone[1] ){
+                        chessboard[row][col].classList.add(block[0]);
+                        scroll.push([row,col])
                     }
                 }
             }
         }
-        if ( scroll[0] ){} else {document.getElementById("errorAudio").play();}
+        
         return scroll;
 
     }
@@ -909,14 +946,13 @@ function play(arr){
     let a = arr[0];
     let b = arr[1];
 
-    if (chessboard[a][b].classList.contains("playable") 
-    || chessboard[a][b].classList.contains("captureable")
-    || chessboard[a][b].classList.contains("promotable")){
+    if (
+        playerActions.some( className => chessboard[a][b].classList.contains(className) )
+    ){
 
         if (checked){
             checked = false;
-            let c = eval (activeSide + "King" );
-            document.querySelector(`.row${c.row+1} .col${c.col+1}`).classList.remove("check");
+            document.querySelector(".check").classList.remove("check");
 
         } else {
 
@@ -924,34 +960,52 @@ function play(arr){
             let pinned = returnValue;
             if ( pinned ){
                 // clear all the threats 
-            for ( i = 0; i < 8; i++){
-                for( j = 0; j < 8; j++){
-                    if ( chessboard[i][j].classList.contains(`threatto${activeSide}`) ){
+                for ( let i = 0; i < 8; i++){
+                    for( j = 0; j < 8; j++){
                         chessboard[i][j].classList.remove(`threatto${activeSide}`);
                     }
                 }
-            }
                 notify (` This ${activePiece.piece[0].toUpperCase() + activePiece.piece.slice(1)} cannot be moved
                 It is Pinned to the ${activeSide} King`, "brown")
                 return pinned;
             }
         }
 
-        if( chessboard[a][b].classList.contains("promotable") ){
+        if (chessboard[a][b].classList.contains("castleable")){
+            // ensure castling hasnt been done b4
+            if (!activePiece.canCastle) return 'Castleless'
+
+            // get next rook to castling position
+            let rook = (activeSide === "white"? whitePieces : blackPieces).find( rook => Math.abs(b - rook.col) === 1 && rook.piece === 'rook')
+
+            let rookPos = [rook.row, rook.col];
+            let newRookPos = [rook.row, b > rook.col? rook.col + 2 : rook.col - 2]
+            
+            // update rook position (castle)
+            chessboard[rook.row][rook.col].classList.remove("occupied", activeSide);
+            rook.row = newRookPos[0], rook.col = newRookPos[1];
+            chessboard[rook.row][rook.col].classList.add("occupied", activeSide);
+
+            // move rook 
+            chessboard[rook.row][rook.col].appendChild( chessboard[rookPos[0]][rookPos[1]].children[0] );
+
+            // update history
+            appHistory.push(`${activePiece} castled and ${rook.id} moved from ${rookPos[0]},${rookPos[1]} to ${rook.row},${rook.col}`)
+            document.getElementById("")
+        }
+
+        if ( chessboard[a][b].classList.contains("promotable") ){
             promote();
         } 
 
-        chessboard[activePiece.row][activePiece.col].classList.remove("occupied");
-        chessboard[activePiece.row][activePiece.col].classList.remove(activeSide);
+        chessboard[activePiece.row][activePiece.col].classList.remove("occupied", activeSide);
 
         
-        if( chessboard[a][b].classList.contains("captureable") ){
+        if ( chessboard[a][b].classList.contains("captureable") ){
             capture (arr);
         }
         let prevPos = [activePiece.row,activePiece.col];        
         
-        chessboard[activePiece.row][activePiece.col].innerHTML = "";
-
         activePiece.row = a;
         activePiece.col = b;
 
@@ -960,6 +1014,7 @@ function play(arr){
         if ( isChecked(activeSide) ){
             checked = true;
             let c = eval (inactiveSide + "King" );
+            c.canCastle = false;
             document.querySelector(`.row${c.row+1} .col${c.col+1}`).classList.add("check");
             notify(`The ${inactiveSide} King is on a Check `, "red")
         }
@@ -969,18 +1024,16 @@ function play(arr){
         if (activePiece.piece == "king"){
             chessboard[prevPos[0]][prevPos[1]].classList.remove("throne");
             chessboard[a][b].classList.add("throne");
-
+            c.canCastle = false;
         }
 
-        chessboard[a][b].innerHTML = `<img id="${activePiece.id}" 
-        onclick="select(${activePiece.id})" 
-        src="${activePiece.dir}"
-        style="width: 90%; height: 80%;"/>`;
-        chessboard[a][b].classList.add("occupied");
-        chessboard[a][b].classList.add(activePiece.side);
+        // move piece
+        chessboard[a][b].innerHTML = '';
+        chessboard[a][b].appendChild( chessboard[prevPos[0]][prevPos[1]].children[0] );
+        chessboard[a][b].classList.add("occupied", activePiece.side);
 
         
-        if( chessboard[a][b].classList.contains("captureable")){
+        if ( chessboard[a][b].classList.contains("captureable")){
             document.getElementById("captureAudio").play();
         } else if (checked){
             document.getElementById("checkAudio").play();
@@ -988,48 +1041,38 @@ function play(arr){
             document.getElementById("playAudio").play();
         }
 
-        if( chessboard[a][b].classList.contains("captureable")){
-            history.push( history.pop() + " and " + activePiece.id + " from " + prevPos +" to "+ finalPos);
+        if ( chessboard[a][b].classList.contains("captureable")){
+            appHistory.push( appHistory.pop() + " and " + activePiece.id + " from " + prevPos +" to "+ finalPos);
             
-        } else {
-            history.push( activePiece.id + " from " + prevPos +" to "+ finalPos );
+        } else if ( !chessboard[a][b].classList.contains("castleable")) {
+            appHistory.push( activePiece.id + " from " + prevPos +" to "+ finalPos );
         }
         
-        // if( checked ){
-        //     document.getElementById("checkAudio").play();
-        // }
-        let makeUp = clearMakeUp();
+        
+        clearMakeUp();
 
-        if (checked && makeUp == "done"){
+        if (checked){
             if (isCheckmate(activeSide)){
                 notify (`The ${inactiveSide} King has been CheckMated`, "red");
                 document.getElementById("ggAudio").play();
                 endGame(activeSide);
 
-            } else {
-                clearMakeUp();
             }
         }
+
+        // update turn
         turn++;
 
         // show undo button if it was not on
-        if (history.length){
+        if (appHistory.length){
             document.querySelector(".history-rev").classList.remove("hide");
         } else {
             document.querySelector(".history-rev").classList.add("hide");
         }
        
-    // clear the remove the former selection
-    
-        for ( i = 0; i < 8; i++){
-            for( j = 0; j < 8; j++){
-                if ( chessboard[i][j].classList.contains("activated") ){
-                    chessboard[i][j].classList.remove("activated");
-                }
-            }
-        }
 
-        
+        // clear the remove the former selection
+        clearMakeUp();      
 
     } 
 }
@@ -1043,7 +1086,7 @@ let capture = function (pos){
     tiringStuff.row = "";
     tiringStuff.col = "";
     activeSide == "white" ? capturedBlack.push(captured) : capturedWhite.push(captured);
-    history.push( captured + " captured " + "on " + [pos[0],pos[1]] );
+    appHistory.push( captured + " captured " + "on " + [pos[0],pos[1]] );
 
 }
 
@@ -1060,7 +1103,7 @@ let testMove = function(soldier, pos, army){
     soldier.row = pos[0];
     soldier.col = pos[1];
 
-    if( !chessboard[soldier.row][soldier.col].classList.contains("occupied") ){
+    if ( !chessboard[soldier.row][soldier.col].classList.contains("occupied") ){
         chessboard[soldier.row][soldier.col].classList.add("occupied");
     }
     chessboard[soldier.row][soldier.col].classList.add(army);
@@ -1085,7 +1128,7 @@ let testMove = function(soldier, pos, army){
 }
 
 let isPinned = function(side){
-    for ( i = 0; i < 8; i++){
+    for ( let i = 0; i < 8; i++){
         for( j = 0; j < 8; j++){
             if ( chessboard[i][j].classList.contains(`threatto${side}`) ){
                 chessboard[i][j].classList.remove(`threatto${side}`);
@@ -1131,7 +1174,7 @@ let isPinned = function(side){
         }
     }
     // clear all the threats 
-    for ( i = 0; i < 8; i++){
+    for ( let i = 0; i < 8; i++){
         for( j = 0; j < 8; j++){
             if ( chessboard[i][j].classList.contains(`threatto${side}`) ){
                 chessboard[i][j].classList.remove(`threatto${side}`);
@@ -1142,6 +1185,7 @@ let isPinned = function(side){
 
 let checkZone = [];
 let checkZone2 = [];
+
 let isChecked = function (side){
     let bk = [blackKing.row, blackKing.col];
     let wk = [whiteKing.row, whiteKing.col];
@@ -1151,7 +1195,8 @@ let isChecked = function (side){
     } else { 
         otherSide = "white" 
     }
-    for ( i = 0; i < 8; i++){
+
+    for ( let i = 0; i < 8; i++){
         for( j = 0; j < 8; j++){
             if ( chessboard[i][j].classList.contains(`threatto${side}`) ){
                 chessboard[i][j].classList.remove(`threatto${side}`);
@@ -1194,15 +1239,6 @@ let isChecked = function (side){
         }
     }
 
-    // clear all the threats 
-    // for ( i = 0; i < 8; i++){
-    //     for( j = 0; j < 8; j++){
-    //         if ( chessboard[i][j].classList.contains(`threatto${otherSide}`) ){
-    //             chessboard[i][j].classList.remove(`threatto${otherSide}`);
-    //         }
-    //     }
-    // }
-
     return false;
 
 
@@ -1215,7 +1251,7 @@ let isChecked = function (side){
     //             kingThreat = scope( whitePiece, whiteScope);
     //         }
     //     });
-    //     for ( threat of kingThreat ){
+    //     for ( let threat of kingThreat ){
     //         if (threat[0] == bk[0] && threat[1] == bk[1]){
     //             return true;
     //         }
@@ -1230,7 +1266,7 @@ let isChecked = function (side){
     //     });
         
 
-    //     for ( threat of kingThreat ){
+    //     for ( let threat of kingThreat ){
     //         if (threat[0] == wk[0] && threat[1] == wk[1]){
     //             return true;
     //         }
@@ -1256,8 +1292,8 @@ function scope (n,king,side){
         case "wpawn" :  // if a WHITE PAWN and the space in front is empty
         if ( row < 7){
             // if it can capture an opposing piece diagonal from it
-            for ( i = row + 1, j = column - 1; i <= 7 && j <= 7 && j <= column + 1; j++){
-                if( j == column || j < 0 ){ 
+            for ( let i = row + 1, j = column - 1; i <= 7 && j <= 7 && j <= column + 1; j++){
+                if ( j == column || j < 0 ){ 
                     continue;
                 } 
                 if ( kr == i && kc == j ){
@@ -1275,7 +1311,7 @@ function scope (n,king,side){
         case "bpawn": // IF IT IS A BLACK PAWN
         if (row > 0){
             // if it can capture an opposing piece diagonal from it
-            for ( i = row - 1, j = column - 1; i >= 0 && j <= 7 && j <= column + 1; j++ ){
+            for ( let i = row - 1, j = column - 1; i >= 0 && j <= 7 && j <= column + 1; j++ ){
                 if ( j == column || j < 0){
                     continue;
                 }
@@ -1295,7 +1331,7 @@ function scope (n,king,side){
         let b = 1;
         let Nmoves = [row + a,column + b,row - a,column - b,row + b,column + a,row - b,column - a,row + a,column - b,row - a,column + b,row + b,column - a,row - b,column + a]
         let size = Nmoves.length;
-        for ( i = 0; i < size - 1; i += 2 ){
+        for ( let i = 0; i < size - 1; i += 2 ){
             if ( Nmoves[i] >= 0 && Nmoves[i+1] >= 0 && Nmoves[i] <= 7 && Nmoves[i+1] <= 7 ){
 
                 r = Nmoves[i];
@@ -1313,7 +1349,7 @@ function scope (n,king,side){
         
             temp = [];
 
-            for (i = row + 1, j = column + 1; i <= 7 && j <= 7; i++ ){
+            for (let i = row + 1, j = column + 1; i <= 7 && j <= 7; i++ ){
                 temp.push([i,j]);
                 chessboard[i][j].classList.add(`threatto${side}`);
 
@@ -1333,7 +1369,7 @@ function scope (n,king,side){
             temp = [];
 
             // GOING DIAGONALLY DOWNWARDS TO THE RIGHT
-            for (i = row - 1, j = column + 1; i >= 0 && j <= 7; i-- ){
+            for (let i = row - 1, j = column + 1; i >= 0 && j <= 7; i-- ){
                 temp.push([i,j]);
                 chessboard[i][j].classList.add(`threatto${side}`);
 
@@ -1353,7 +1389,7 @@ function scope (n,king,side){
             // GOING DIAGONALLY UPWARDS THE LEFT
             temp = [];
 
-            for (i = row + 1, j = column - 1; i <= 7 && j >= 0; i++ ){
+            for (let i = row + 1, j = column - 1; i <= 7 && j >= 0; i++ ){
                 temp.push([i,j]);
                 chessboard[i][j].classList.add(`threatto${side}`);
                 if (chessboard[i][j].classList.contains("occupied")){
@@ -1372,7 +1408,7 @@ function scope (n,king,side){
             // GOING DIAGONALLY DOWNWARDS TO THE LEFT
             temp = [];
 
-            for (i = row - 1, j = column - 1; i >= 0 && j >= 0; i-- ){
+            for (let i = row - 1, j = column - 1; i >= 0 && j >= 0; i-- ){
                 temp.push([i,j]);
                 chessboard[i][j].classList.add(`threatto${side}`);
                 if ( chessboard[i][j].classList.contains("occupied")) {
@@ -1393,7 +1429,7 @@ function scope (n,king,side){
         
         case "rook" : // THE COLUMN UPWARDS
         temp = [];
-            for (i = row + 1, j = column; i <= 7; i++ ){
+            for (let i = row + 1, j = column; i <= 7; i++ ){
                 temp.push[i,j];
                 chessboard[i][j].classList.add(`threatto${side}`);
 
@@ -1412,7 +1448,7 @@ function scope (n,king,side){
             // SAME COLUMN DOWNWARDS
             temp = [];
 
-            for (i = row - 1, j = column; i >= 0; i-- ){
+            for (let i = row - 1, j = column; i >= 0; i-- ){
                 temp.push[i,j];
                 chessboard[i][j].classList.add(`threatto${side}`);
                 
@@ -1431,7 +1467,7 @@ function scope (n,king,side){
             // SAME ROW BACKWARDS
             temp = [];
 
-            for (i = row, j = column - 1; j >= 0; j-- ){
+            for (let i = row, j = column - 1; j >= 0; j-- ){
                 temp.push[i,j];
                 chessboard[i][j].classList.add(`threatto${side}`);
 
@@ -1449,7 +1485,7 @@ function scope (n,king,side){
             // SAME ROW FORWARDS
             temp = [];
 
-            for (i = row, j = column + 1; j <= 7; j++ ){
+            for (let i = row, j = column + 1; j <= 7; j++ ){
                 temp.push[i,j];
                 chessboard[i][j].classList.add(`threatto${side}`);
                 
@@ -1473,7 +1509,7 @@ function scope (n,king,side){
         
         // MOVEMENT LIKE THE BISHOP
         temp = [];
-        for (i = row + 1, j = column + 1; i <= 7 && j <= 7; i++ ){
+        for (let i = row + 1, j = column + 1; i <= 7 && j <= 7; i++ ){
             temp.push([i,j]);
             chessboard[i][j].classList.add(`threatto${side}`);
             
@@ -1493,7 +1529,7 @@ function scope (n,king,side){
             // GOING DIAGONALLY DOWNWARDS TO THE RIGHT
             temp = [];
 
-            for (i = row - 1, j = column + 1; i >= 0 && j <= 7; i-- ){
+            for (let i = row - 1, j = column + 1; i >= 0 && j <= 7; i-- ){
                 temp.push([i,j]);
                 chessboard[i][j].classList.add(`threatto${side}`);
 
@@ -1513,7 +1549,7 @@ function scope (n,king,side){
             // GOING DIAGONALLY UPWARDS THE LEFT
             temp = [];
 
-            for (i = row + 1, j = column - 1; i <= 7 && j >= 0; i++ ){
+            for (let i = row + 1, j = column - 1; i <= 7 && j >= 0; i++ ){
                 temp.push([i,j]);
                 chessboard[i][j].classList.add(`threatto${side}`);
                 if ( chessboard[i][j].classList.contains("occupied") ){
@@ -1532,7 +1568,7 @@ function scope (n,king,side){
             // GOING DIAGONALLY DOWNWARDS TO THE LEFT
             temp = [];
 
-            for (i = row - 1, j = column - 1; i >= 0 && j >= 0; i-- ){
+            for (let i = row - 1, j = column - 1; i >= 0 && j >= 0; i-- ){
                 temp.push([i,j]);
                 chessboard[i][j].classList.add(`threatto${side}`);
                 if ( chessboard[i][j].classList.contains("occupied") ){
@@ -1553,7 +1589,7 @@ function scope (n,king,side){
             // THE COLUMN UPWARDS
             temp = [];
 
-            for (i = row + 1, j = column; i <= 7; i++ ){
+            for (let i = row + 1, j = column; i <= 7; i++ ){
                 temp.push([i,j]);
                 chessboard[i][j].classList.add(`threatto${side}`);
                 if ( chessboard[i][j].classList.contains("occupied") ){
@@ -1571,7 +1607,7 @@ function scope (n,king,side){
             // SAME COLUMN DOWNWARDS
             temp = [];
  
-            for (i = row - 1, j = column; i >= 0; i-- ){
+            for (let i = row - 1, j = column; i >= 0; i-- ){
                 temp.push([i,j]);
                 chessboard[i][j].classList.add(`threatto${side}`);
                 if ( chessboard[i][j].classList.contains("occupied") ){
@@ -1589,7 +1625,7 @@ function scope (n,king,side){
             // SAME ROW BACKWARDS
             temp = [];
 
-            for (i = row, j = column - 1; j >= 0; j-- ){
+            for (let i = row, j = column - 1; j >= 0; j-- ){
                 temp.push([i,j]);
                 chessboard[i][j].classList.add(`threatto${side}`);
                 if ( chessboard[i][j].classList.contains("occupied") ){
@@ -1607,7 +1643,7 @@ function scope (n,king,side){
             // SAME ROW FORWARDS
             temp = [];
 
-            for (i = row, j = column + 1; j <= 7; j++ ){
+            for (let i = row, j = column + 1; j <= 7; j++ ){
                 temp.push([i,j]);
                 chessboard[i][j].classList.add(`threatto${side}`);
                 if ( chessboard[i][j].classList.contains("occupied") ){
@@ -1630,7 +1666,7 @@ function scope (n,king,side){
                 continue Kloop1;
             } else {
             Kloop2:
-                for ( j = column+1;  j >= 0 && j >= column-1; j-- ){
+                for ( let j = column+1;  j >= 0 && j >= column-1; j-- ){
                     if ( j == 8 || (i == row && j == column) ){
                         continue Kloop2;
                     }
@@ -1659,8 +1695,8 @@ function checkScope (n,side){
         case "wpawn" :  // if a WHITE PAWN and the space in front is empty
         if ( row < 7){
             // if it can capture an opposing piece diagonal from it
-            for ( i = row + 1, j = column - 1; i <= 7 && j <= 7 && j <= column + 1; j++){
-                if( j == column || j < 0 ){ 
+            for ( let i = row + 1, j = column - 1; i <= 7 && j <= 7 && j <= column + 1; j++){
+                if ( j == column || j < 0 ){ 
                     continue;
                 }
                 chessboard[i][j].classList.add(`threatto${side}`);
@@ -1672,7 +1708,7 @@ function checkScope (n,side){
         case "bpawn": // IF IT IS A BLACK PAWN
         if (row > 0){
             // if it can capture an opposing piece diagonal from it
-            for ( i = row - 1, j = column - 1; i >= 0 && j <= 7 && j <= column + 1; j++ ){
+            for ( let i = row - 1, j = column - 1; i >= 0 && j <= 7 && j <= column + 1; j++ ){
                 if ( j == column || j < 0){
                     continue;
                 }
@@ -1684,9 +1720,12 @@ function checkScope (n,side){
         case "knight" : // FOR A KNIGHT
         let a = 2;
         let b = 1;
+
+        // L shape of a knight
         let Nmoves = [row + a,column + b,row - a,column - b,row + b,column + a,row - b,column - a,row + a,column - b,row - a,column + b,row + b,column - a,row - b,column + a]
         let size = Nmoves.length;
-        for ( i = 0; i < size - 1; i += 2 ){
+
+        for ( let i = 0; i < size - 1; i += 2 ){
             if ( Nmoves[i] >= 0 && Nmoves[i+1] >= 0 && Nmoves[i] <= 7 && Nmoves[i+1] <= 7 ){
                 r = Nmoves[i];
                 c = Nmoves[i+1];
@@ -1696,7 +1735,7 @@ function checkScope (n,side){
         break;
 
         case "bishop" :  // GOING DIAGONALLY UPWARDS TO THE RIGHT
-        for (i = row + 1, j = column + 1; i <= 7 && j <= 7; i++ ){
+        for (let i = row + 1, j = column + 1; i <= 7 && j <= 7; i++ ){
             chessboard[i][j].classList.add(`threatto${side}`);
             if (chessboard[i][j].classList.contains("occupied")){
                 break                     
@@ -1704,7 +1743,7 @@ function checkScope (n,side){
             j++;
             }
             // GOING DIAGONALLY DOWNWARDS TO THE RIGHT
-            for (i = row - 1, j = column + 1; i >= 0 && j <= 7; i-- ){
+            for (let i = row - 1, j = column + 1; i >= 0 && j <= 7; i-- ){
                 chessboard[i][j].classList.add(`threatto${side}`);
 
                 if (chessboard[i][j].classList.contains("occupied")){
@@ -1713,7 +1752,7 @@ function checkScope (n,side){
                 j++;
             }
             // GOING DIAGONALLY UPWARDS THE LEFT
-            for (i = row + 1, j = column - 1; i <= 7 && j >= 0; i++ ){
+            for (let i = row + 1, j = column - 1; i <= 7 && j >= 0; i++ ){
                 chessboard[i][j].classList.add(`threatto${side}`);
                 if (chessboard[i][j].classList.contains("occupied")){
                     break;
@@ -1721,7 +1760,7 @@ function checkScope (n,side){
                 j--;
             }
             // GOING DIAGONALLY DOWNWARDS TO THE LEFT
-            for (i = row - 1, j = column - 1; i >= 0 && j >= 0; i-- ){
+            for (let i = row - 1, j = column - 1; i >= 0 && j >= 0; i-- ){
                 chessboard[i][j].classList.add(`threatto${side}`);
                 if ( chessboard[i][j].classList.contains("occupied")) {
                     break;
@@ -1734,14 +1773,14 @@ function checkScope (n,side){
         // MOVEMENT FOR THE ROOK
         
         case "rook" : // THE COLUMN UPWARDS
-        for (i = row + 1, j = column; i <= 7; i++ ){
+        for (let i = row + 1, j = column; i <= 7; i++ ){
             chessboard[i][j].classList.add(`threatto${side}`);
             if (chessboard[i][j].classList.contains("occupied")){
                 break;
             }
         }
         // SAME COLUMN DOWNWARDS
-        for (i = row - 1, j = column; i >= 0; i-- ){
+        for (let i = row - 1, j = column; i >= 0; i-- ){
             chessboard[i][j].classList.add(`threatto${side}`);
             
             if (chessboard[i][j].classList.contains("occupied")){
@@ -1749,7 +1788,7 @@ function checkScope (n,side){
             }
         }
         // SAME ROW BACKWARDS
-        for (i = row, j = column - 1; j >= 0; j-- ){
+        for (let i = row, j = column - 1; j >= 0; j-- ){
             chessboard[i][j].classList.add(`threatto${side}`);
 
             if (chessboard[i][j].classList.contains("occupied")){
@@ -1757,7 +1796,7 @@ function checkScope (n,side){
             }
         }
         // SAME ROW FORWARDS
-        for (i = row, j = column + 1; j <= 7; j++ ){
+        for (let i = row, j = column + 1; j <= 7; j++ ){
             chessboard[i][j].classList.add(`threatto${side}`);
             
             if (chessboard[i][j].classList.contains("occupied")){
@@ -1772,7 +1811,7 @@ function checkScope (n,side){
     case "queen": 
     
     // MOVEMENT LIKE THE BISHOPtemp = [];
-    for (i = row + 1, j = column + 1; i <= 7 && j <= 7; i++ ){
+    for (let i = row + 1, j = column + 1; i <= 7 && j <= 7; i++ ){
         chessboard[i][j].classList.add(`threatto${side}`);
         
         if (chessboard[i][j].classList.contains("occupied")){
@@ -1781,7 +1820,7 @@ function checkScope (n,side){
         j++;
     }
     // GOING DIAGONALLY DOWNWARDS TO THE RIGHT
-    for (i = row - 1, j = column + 1; i >= 0 && j <= 7; i-- ){
+    for (let i = row - 1, j = column + 1; i >= 0 && j <= 7; i-- ){
         chessboard[i][j].classList.add(`threatto${side}`);
 
         if (chessboard[i][j].classList.contains("occupied")){
@@ -1790,7 +1829,7 @@ function checkScope (n,side){
         j++;
     }
     // GOING DIAGONALLY UPWARDS THE LEFT
-    for (i = row + 1, j = column - 1; i <= 7 && j >= 0; i++ ){
+    for (let i = row + 1, j = column - 1; i <= 7 && j >= 0; i++ ){
         chessboard[i][j].classList.add(`threatto${side}`);
         if ( chessboard[i][j].classList.contains("occupied") ){
             break;
@@ -1798,7 +1837,7 @@ function checkScope (n,side){
         j--;
     }
     // GOING DIAGONALLY DOWNWARDS TO THE LEFT
-    for (i = row - 1, j = column - 1; i >= 0 && j >= 0; i-- ){
+    for (let i = row - 1, j = column - 1; i >= 0 && j >= 0; i-- ){
         chessboard[i][j].classList.add(`threatto${side}`);
         if ( chessboard[i][j].classList.contains("occupied") ){
             break;
@@ -1807,28 +1846,28 @@ function checkScope (n,side){
     }
     // MOVEMENT LIKE THE ROOK
     // THE COLUMN UPWARDS
-        for (i = row + 1, j = column; i <= 7; i++ ){
+        for (let i = row + 1, j = column; i <= 7; i++ ){
             chessboard[i][j].classList.add(`threatto${side}`);
             if ( chessboard[i][j].classList.contains("occupied") ){
                 break;
             }
         }
         // SAME COLUMN DOWNWARDS
-        for (i = row - 1, j = column; i >= 0; i-- ){
+        for (let i = row - 1, j = column; i >= 0; i-- ){
             chessboard[i][j].classList.add(`threatto${side}`);
             if ( chessboard[i][j].classList.contains("occupied") ){
                 break;
             }
         }
         // SAME ROW BACKWARDS
-            for (i = row, j = column - 1; j >= 0; j-- ){
+            for (let i = row, j = column - 1; j >= 0; j-- ){
             chessboard[i][j].classList.add(`threatto${side}`);
             if ( chessboard[i][j].classList.contains("occupied") ){
                 break;
             }
         }
         // SAME ROW FORWARDS
-        for (i = row, j = column + 1; j <= 7; j++ ){
+        for (let i = row, j = column + 1; j <= 7; j++ ){
             chessboard[i][j].classList.add(`threatto${side}`);
             if ( chessboard[i][j].classList.contains("occupied") ){
                 break;
@@ -1844,7 +1883,7 @@ function checkScope (n,side){
                 continue Kloop1;
             } else {
             Kloop2:
-                for ( j = column+1; j >= column-1 & j >= 0; j-- ){
+                for ( let j = column+1; j >= column-1 & j >= 0; j-- ){
                     if ( j == 8  || (i == row && j == column) ){
                         continue Kloop2;
                     }
@@ -1901,7 +1940,7 @@ let upgrade = function(newPiece){
     let h = activePiece.col
 
     // add the promotion to history
-    history.push( history.pop() + " and " + `${activePiece.id} promoted to ${newPiece}`);
+    appHistory.push( appHistory.pop() + " and " + `${activePiece.id} promoted to ${newPiece}`);
     // console.log(history);
 
     chessboard[g][h].innerHTML = `<img id="${activePiece.id}" 
@@ -1917,147 +1956,68 @@ let upgrade = function(newPiece){
         document.querySelector(`.row${c.row+1} .col${c.col+1}`).classList.add("check");
     }
 }
-    let isCheckmate = function(colour ){
-        // if it is white's turn
+
+
+let isCheckmate = function(colour ){
+    /**
+     * Check if it is a Checkmate
+     */
+
+    // if it is white's turn
     if (colour == "black"){
-        for ( whitePiece of whitePieces ) {
+        for ( let whitePiece of whitePieces ) {
             // captured piece cannot cause check
             if ( !capturedWhite.includes(eval ("whitePiece.id")) ){
-                let z = showPlays(whitePiece);
-                z = z;
+                let possilePlays = showPlays(whitePiece);
+                let availablePlays = possilePlays?.length;
                 
-                if (whitePiece == whiteKing){
-                    z = z;
-                    if(z[0]){
-                        for ( i = 0; i < z.length; i ++){
-                            let l = z[i];
-                            if (chessboard[l[0]][l[1]].classList.contains("threattowhite")){
-                                if (chessboard[l[0]][l[1]].classList.contains("playable")){
-                                    chessboard[l[0]][l[1]].classList.remove("playable")
-                                    
-                                } else if (chessboard[l[0]][l[1]].classList.contains("captureable")){
-                                    chessboard[l[0]][l[1]].classList.remove("captureable")
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    if (z[0]){
-                        // console.log("not");
-                        return false 
-                    }
-                }
+                if (availablePlays)
+                    return false
             }
         }
-        for ( i = 0; i < 8; i++){
-            for( j = 0; j < 8; j++){
-                if ( chessboard[i][j].classList.contains("playable") || chessboard[i][j].classList.contains("captureable") ){
-                    // console.log("not");
-                    clearMakeUp();
-                    return false;
-                }
-            }
-        }
-        
-        let k = whiteKing;
-        row = k.row;
-        column = k.column;
-        Kloop1:
-        for ( let i = row+1; i >= row-1 && i >= 0; i--){
-            if ( i == 8  ){
-                continue Kloop1;
-            } else {
-            Kloop2:
-                for ( j = column+1;  j >= 0 && j >= column-1; j-- ){
-                    if ( j == 8 || (i == row && j == column) ){
-                        continue Kloop2;
-                    }
-                    chessboard[i][j].classList.add("check");
-                }
-            
-            }
-        }
-        return true;
 
     } else {
-        for ( blackPiece of blackPieces ) {
+        for ( let blackPiece of blackPieces ) {
             // captured pieces cannot cause check
-            if ( !capturedBlack.includes( eval ("blackPiece.id")) ){
-                let y = showPlays( blackPiece);
-                y = y;
-                if (blackPiece == blackKing){
-                    y = y;
-                    if (y[0]){
-                        for ( i = 0; i < y.length; i ++){
-                            let k = y[i];
-                            if (chessboard[k[0]][k[1]].classList.contains("threattoblack")){
-                                if (chessboard[k[0]][k[1]].classList.contains("playable")){
-                                    chessboard[k[0]][k[1]].classList.remove("playable")
-                                    
-                                } else if (chessboard[k[0]][k[1]].classList.contains("captureable")){
-                                    chessboard[k[0]][k[1]].classList.remove("captureable")
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    if (y[0]){
-                        return false 
-                    }
-                }
+            if ( !capturedWhite.includes(eval ("blackPiece.id")) ){
+                let possilePlays = showPlays(blackPiece);
+                let availablePlays = possilePlays?.length;
+                
+                if (availablePlays)
+                    return false
             }
         }
-
-        for ( i = 7; i > 0; i--){
-            for( j = 7; j > 0; j--){
-                if ( chessboard[i][j].classList.contains("playable") || chessboard[i][j].classList.contains("captureable") ){
-                    // console.log([i,j]);
-                    clearMakeUp();
-                    return false;
-                }
-            }
-        }
-        let k = blackKing;
-        row = k.row;
-        column = k.column;
-        Kloop1:
-        for ( let i = row+1; i >= row-1 && i >= 0; i--){
-            if ( i == 8  ){
-                continue Kloop1;
-            } else {
-            Kloop2:
-                for ( j = column+1;  j >= 0 && j >= column-1; j-- ){
-                    if ( j == 8 || (i == row && j == column) ){
-                        continue Kloop2;
-                    }
-                    chessboard[i][j].classList.add("check");
-                }
-            
-            }
-        }
-        return true;
     }
+
+    clearMakeUp();
+    return true
     
 }
 
+
+
 let undo = function(){
-    if (history.length == 0){
+    /** UNDO MOST  MOVE */
+
+    if (appHistory.length == 0){
         return
     } 
+
     setTimeout(function() {
 
-        let split = history.splice(-1)[0];
+        let split = appHistory.splice(-1)[0];
         let lastLog = split.split(" ");
         undoPiece = eval(lastLog[0]);
         side = undoPiece.side;
         let oppSide;
         side == "white" ? oppSide = "black" : oppSide = "white"
+
         if (lastLog[1] == "from" && lastLog[5] != "and"){
 
-            let newPos = [eval(lastLog[4][0]),eval(lastLog[4][2])];
-            chessboard[newPos[0]][newPos[1]].classList.remove("occupied");
-            chessboard[newPos[0]][newPos[1]].classList.remove(side);
-            chessboard[newPos[0]][newPos[1]].innerHTML = "";
+            let newPos = [eval(lastLog[4][0]), eval(lastLog[4][2])];
+            chessboard[newPos[0]][newPos[1]].classList.remove("occupied", side);
+
+            const innerHTML = chessboard[newPos[0]][newPos[1]].children[0];
 
             let oldPos = [eval(lastLog[2][0]),eval(lastLog[2][2])];
             if (chessboard[newPos[0]][newPos[1]].classList.contains("throne")){
@@ -2070,10 +2030,7 @@ let undo = function(){
 
             chessboard[oldPos[0]][oldPos[1]].classList.add("occupied");
             chessboard[oldPos[0]][oldPos[1]].classList.add(side);
-            chessboard[oldPos[0]][oldPos[1]].innerHTML = `<img id="${undoPiece.id}" 
-            onclick="select(${undoPiece.id})" 
-            src="${undoPiece.dir}"
-            style="height: 80%; width: 90%;"/>`;
+            chessboard[oldPos[0]][oldPos[1]].appendChild(innerHTML)
 
 
 
@@ -2087,7 +2044,10 @@ let undo = function(){
 
             // the square that the piece was on before the capture
             let capOld = [eval(lastLog[7][0]),eval(lastLog[7][2])];
+
             // if it was a king drag his throne with him
+            const innerHTML = chessboard[capNew[0]][capNew[1]].children[0];
+
             if (chessboard[capNew[0]][capNew[1]].classList.contains("throne")){
                 chessboard[capNew[0]][capNew[1]].classList.remove("throne");
                 chessboard[capOld[0]][capOld[1]].classList.add("throne");
@@ -2097,10 +2057,7 @@ let undo = function(){
             capturer.col = capOld[1];
 
             chessboard[capOld[0]][capOld[1]].classList.add(capturer.side);
-            chessboard[capOld[0]][capOld[1]].innerHTML = `<img id="${capturer.id}" 
-            onclick="select(${capturer.id})" 
-            src="${capturer.dir}"
-            style="width: 90%; height: 80%;"/>`;
+            chessboard[capOld[0]][capOld[1]].appendChild( innerHTML );
 
             // undo the capture
 
@@ -2134,6 +2091,29 @@ let undo = function(){
             
             }
 
+        } else if (lastLog[1] === 'castled'){
+            let king = undoPiece
+            // king at the 4 index
+
+            chessboard[king.row][king.col].classList.remove("throne", "occupied", side);
+            const kingImg = chessboard[king.row][king.col].children[0];
+            king.col = 4;
+
+            chessboard[king.row][king.col].appendChild(kingImg);
+            chessboard[king.row][king.col].classList.add("throne", "occupied", side);
+            king.canCastle = true
+            
+            let rook = eval(lastLog[3]);
+
+            let rookNewCol = eval(lastLog[8][2]);
+            chessboard[king.row][rookNewCol].classList.remove("occupied", side);
+            const rookImg = chessboard[rook.row][rook.col].children[0];
+
+            let rookOld = eval(lastLog[6][2]);
+            rook.col = rookOld;
+
+            chessboard[rookOld[0]][rookOld[1]].classList.add(side, "occupied");
+            chessboard[rook.row][rook.col].appendChild(rookImg);
 
         } else {
 
@@ -2148,6 +2128,8 @@ let undo = function(){
                 chessboard[oldPos[0]][oldPos[1]].classList.add("throne");
             }
 
+            const innerHTML = chessboard[newPos[0]][newPos[1]].children[0];
+
             undoPiece.row = oldPos[0];
             undoPiece.col = oldPos[1];
 
@@ -2157,10 +2139,7 @@ let undo = function(){
             side == "white" ? undoPiece.piece = "wpawn": undoPiece.piece = "bpawn";
             undoPiece.dir = "assets/pieces/" + side + "-pawn" + undoPiece.id.slice(-2,-1) + ".png";
 
-            chessboard[oldPos[0]][oldPos[1]].innerHTML = `<img id="${undoPiece.id}" 
-            onclick="select(${undoPiece.id})" 
-            src="assets/pieces/${side + "-pawn" + undoPiece.id.slice(-2,-1) + ".png"}"
-            style="width: 90%; height: 80%;"/>`;
+            chessboard[oldPos[0]][oldPos[1]].appendChild( innerHTML )
 
         }
         document.getElementById("reverseAudio").play()
@@ -2169,7 +2148,7 @@ let undo = function(){
         isChecked(oppSide);
 
         turn--;
-        return history
+        return appHistory
     }, 200);
 }
 

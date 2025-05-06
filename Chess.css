@@ -95,7 +95,7 @@ td{
 .captureable{
     background-color: red;
 }
-.promotable{
+.promotable, .castleable{
     background-color: purple;
 }
 .playable{
